@@ -1,0 +1,212 @@
+---
+const cards = [
+  {
+    icon: "/assets/images/icon-1.svg",
+    title: "Подкрепа от експерти с 10+ години опит",
+    text: "Работиш с хора, които знаят играта до съвършенство и споделят опита си с теб.",
+  },
+  {
+    icon: "/assets/images/icon-2.svg",
+    title: "Достъп до съвременна обучителна платформа",
+    text: "Без суха теория, само реални казуси и ситуации от пазара.",
+  },
+  {
+    icon: "/assets/images/icon-3.svg",
+    title: "Специализирани тренинги",
+    text: "Редовни обучения с доказани български и международни лектори в продажбите.",
+  },
+  {
+    icon: "/assets/images/icon-4.svg",
+    title: "Реално кариерно развитие",
+    text: "Възможност да изградиш име на пазара и бързо да застанеш начело на свой екип.",
+  },
+  {
+    icon: "/assets/images/icon-5.svg",
+    title: "Доходи, обвързани с твоя успех",
+    text: "Печелиш правопропорционално на твоите резултати и сделки. Без никакви тавани.",
+  },
+  {
+    icon: "/assets/images/icon-6.svg",
+    title: "Свобода за растеж без изкуствени лимити",
+    text: "Развиваш се със собствено темпо, но с усещането, че никога не си сам на терен.",
+  },
+  {
+    icon: "/assets/images/icon-7.svg",
+    title: "Интензивни ролеви игри и тренировки",
+    text: "Симулации на срещи и преговори, които вдигат увереността ти двойно.",
+  },
+];
+---
+
+<section class="expect" id="kakvo-te-ochakva">
+  <div class="expect__inner container">
+    <header class="expect__header">
+      <h2 class="expect__title">Какво те очаква в inclusive?</h2>
+      <a class="btn expect__cta" href="#kandidatstvay">Стани част от екипа</a>
+    </header>
+  </div>
+
+  <div class="expect__content container">
+    <div class="expect__scroll" tabindex="0" aria-label="Какво те очаква — превърти хоризонтално">
+      <ul class="expect__track">
+        {cards.map((card) => (
+          <li class="expect__card">
+            <div class="expect__card-top">
+              <img class="expect__icon" src={card.icon} alt="" width="40" height="40" aria-hidden="true" />
+              <h3 class="expect__card-title">{card.title}</h3>
+            </div>
+            <span class="gold-rule"></span>
+            <p class="expect__card-text">{card.text}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="expect__progress" aria-hidden="true">
+      <span class="expect__progress-bar"></span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .expect {
+    width: 100%;
+    background-color: var(--color-bg-dark);
+    padding-block: 5em; /* 80px */
+    display: flex;
+    flex-direction: column;
+    gap: 4em; /* 64px */
+  }
+
+  .expect__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2em;
+    width: 100%;
+  }
+
+  .expect__title {
+    max-width: 36.125em; /* 578px */
+    font-family: var(--font-heading);
+    font-size: 3em; /* 48px */
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--color-gray-20);
+  }
+
+  .expect__cta {
+    flex-shrink: 0;
+  }
+
+  .expect__content {
+    display: flex;
+    flex-direction: column;
+    gap: 3.5em; /* 56px */
+  }
+
+  .expect__scroll {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .expect__scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .expect__track {
+    display: flex;
+    width: max-content;
+  }
+
+  .expect__card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1em; /* 16px */
+    width: 26em; /* 416px */
+    padding: 2.5em 2.375em; /* 40px 38px */
+    border: 1px solid var(--color-gray-60);
+    border-left: none;
+  }
+
+  .expect__card:first-child {
+    border-left: 1px solid var(--color-gray-60);
+  }
+
+  .expect__card-top {
+    display: flex;
+    flex-direction: column;
+    gap: 1.625em; /* 26px */
+    width: 100%;
+  }
+
+  .expect__icon {
+    width: 2.5em; /* 40px */
+    height: 2.5em;
+  }
+
+  .expect__card-title {
+    font-family: var(--font-heading);
+    font-size: 2em; /* 32px */
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--color-gray-10);
+  }
+
+  .expect__card-text {
+    font-family: var(--font-body);
+    font-size: 1.25em; /* 20px */
+    font-weight: 300;
+    line-height: 1.4;
+    color: var(--color-gray-20);
+  }
+
+  /* Scroll progress indicator */
+  .expect__progress {
+    align-self: flex-end;
+    width: 13.75em; /* 220px */
+    height: 8px;
+    background-color: var(--color-gray-80);
+    overflow: hidden;
+  }
+
+  .expect__progress-bar {
+    display: block;
+    width: 38%;
+    height: 100%;
+    background-color: var(--color-gold);
+  }
+
+  @media (max-width: 767px) {
+    .expect__header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.5em;
+    }
+
+    .expect__card {
+      width: 20em;
+    }
+  }
+</style>
+
+<script>
+  const scroller = document.querySelector(".expect__scroll");
+  const bar = document.querySelector(".expect__progress-bar") as HTMLElement | null;
+
+  if (scroller && bar) {
+    const update = () => {
+      const max = scroller.scrollWidth - scroller.clientWidth;
+      const ratio = max > 0 ? scroller.scrollLeft / max : 0;
+      const travel = 100 - 38; // bar is 38% wide
+      bar.style.marginLeft = `${ratio * travel}%`;
+    };
+    scroller.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+  }
+</script>

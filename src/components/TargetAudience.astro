@@ -1,0 +1,165 @@
+---
+// Section: "За кого е" — who we're looking for
+---
+
+<section class="ta" id="za-kogo-e">
+  <div class="ta__inner container">
+    <header class="ta__header">
+      <h2 class="ta__title">Търсим хората, с които да вървим в една посока.</h2>
+      <span class="gold-rule"></span>
+      <p class="ta__subtitle">
+        Опитът не е задължителен. Важното е да имаш хъс, а за обучението и подкрепата ще се
+        погрижим ние. Ела в екипа ни, ако:
+      </p>
+    </header>
+
+    <div class="ta__grid">
+      <!-- Row 1 -->
+      <div class="ta__media">
+        <img src="/assets/images/target-1.jpg" alt="Екип на INclusive в офиса" width="399" height="301" loading="lazy" />
+      </div>
+      <article class="ta__card">
+        <span class="gold-rule"></span>
+        <h3 class="ta__card-title">Притежаваш характер и отговорност</h3>
+      </article>
+      <article class="ta__card ta__card--accent">
+        <span class="gold-rule"></span>
+        <h3 class="ta__card-title ta__card-title--gold">Имаш търговски нюх и постоянство</h3>
+        <p class="ta__card-text">
+          Имаш вътрешен устрем за продажби и си готов да действаш ден след ден, сделка след сделка,
+          за да стигнеш целите, които си поставил.
+        </p>
+      </article>
+
+      <!-- Row 2 -->
+      <article class="ta__card">
+        <span class="gold-rule"></span>
+        <h3 class="ta__card-title">Залагаш на самодисциплина и развитие</h3>
+      </article>
+      <article class="ta__card">
+        <span class="gold-rule"></span>
+        <h3 class="ta__card-title">Вярваш в екипността и общите успехи</h3>
+      </article>
+      <div class="ta__media">
+        <img src="/assets/images/target-2.jpg" alt="Среща на брокери от INclusive" width="399" height="303" loading="lazy" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ta {
+    width: 100%;
+    background-color: var(--color-gray-40);
+    padding-block: 5em; /* 80px */
+  }
+
+  .ta__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3.5em; /* 56px */
+  }
+
+  .ta__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75em; /* 12px */
+    max-width: 39.625em; /* 634px */
+    text-align: center;
+  }
+
+  .ta__title {
+    font-family: var(--font-heading);
+    font-size: 3em; /* 48px */
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--color-gray-100);
+  }
+
+  .ta__subtitle {
+    font-family: var(--font-body);
+    font-size: 1.25em; /* 20px */
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--color-gray-80);
+  }
+
+  .ta__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5625em; /* 25px */
+    width: 100%;
+  }
+
+  .ta__media {
+    height: 18.8125em; /* 301px */
+    border-radius: 0.25em;
+    overflow: hidden;
+  }
+
+  .ta__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ta__card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.5em;
+    min-height: 18.8125em; /* 301px */
+    padding: 1.75em 1.5em; /* 28px 24px */
+    background-color: var(--color-gray-20);
+  }
+
+  .ta__card-title {
+    font-family: var(--font-heading);
+    font-size: 1.75em; /* 28px */
+    font-weight: 600;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--color-gray-100);
+    margin-top: auto;
+  }
+
+  .ta__card-title--gold {
+    color: var(--color-gold-deep);
+  }
+
+  .ta__card--accent {
+    justify-content: flex-end;
+    gap: 0.75em;
+  }
+
+  .ta__card--accent .ta__card-title {
+    margin-top: 0;
+  }
+
+  .ta__card-text {
+    font-family: var(--font-body);
+    font-size: 1.25em; /* 20px */
+    font-weight: 300;
+    line-height: 1.3;
+    color: var(--color-gray-80);
+  }
+
+  @media (max-width: 991px) {
+    .ta__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .ta__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ta__card {
+      min-height: auto;
+    }
+  }
+</style>

@@ -1,0 +1,283 @@
+---
+const beliefs = [
+  "Най-силните резултати идват, когато има доверие в екипа",
+  "Човек расте най-много в правилната среда",
+  "Отношението към хората тежи повече от титлите",
+  "Професионализмът личи в начина на работа, не в шумните думи",
+  "Успехът е общ процес, а не индивидуално състезание",
+];
+---
+
+<section class="cta" id="kandidatstvay">
+  <div class="cta__panel container">
+    <div class="cta__text">
+      <div class="cta__heading">
+        <h2 class="cta__title">Стани част от екипа на INclusive</h2>
+        <span class="gold-rule"></span>
+      </div>
+      <div class="cta__beliefs">
+        <p class="cta__beliefs-lead">Ако и ти вярваш, че:</p>
+        <ul class="cta__list">
+          {beliefs.map((b) => (
+            <li class="cta__list-item">
+              <span class="cta__dot"></span>
+              <span>{b}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <form class="cta__form" method="post" action="/api/apply" novalidate>
+      <div class="cta__field">
+        <label class="cta__label" for="cta-name">Имена:</label>
+        <input class="cta__input" id="cta-name" name="name" type="text" placeholder="Име Фамилия" autocomplete="name" required />
+      </div>
+      <div class="cta__field">
+        <label class="cta__label" for="cta-phone">Телефон:</label>
+        <input class="cta__input" id="cta-phone" name="phone" type="tel" placeholder="Телефон" autocomplete="tel" required />
+      </div>
+      <div class="cta__field">
+        <label class="cta__label" for="cta-email">Имейл</label>
+        <input class="cta__input" id="cta-email" name="email" type="email" placeholder="Имейл адрес" autocomplete="email" required />
+      </div>
+
+      <label class="cta__consent">
+        <input class="cta__checkbox" type="checkbox" name="consent" required />
+        <span>Давам съгласието си данните ми да бъдат обработени съгласно приложения формуляр</span>
+      </label>
+
+      <button class="btn cta__submit" type="submit">Кандидатствай сега!</button>
+      <p class="cta__status" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+<style>
+  .cta {
+    position: relative;
+    width: 100%;
+    padding-block: 5.25em; /* 84px */
+    background-image: linear-gradient(rgba(33, 35, 43, 0.9), rgba(33, 35, 43, 0.9)),
+      url("/assets/images/cta-bg.jpg");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .cta__panel {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 4.6875em; /* 75px */
+    padding: 3em; /* 48px */
+    border: 1px solid var(--color-gold);
+  }
+
+  .cta__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5em;
+    flex: 1 1 36.5em; /* 584px */
+    max-width: 36.5em;
+  }
+
+  .cta__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em; /* 24px */
+  }
+
+  .cta__title {
+    font-family: var(--font-heading);
+    font-size: 3em; /* 48px */
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--color-gray-10);
+  }
+
+  .cta__beliefs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em; /* 12px */
+  }
+
+  .cta__beliefs-lead {
+    font-family: var(--font-body);
+    font-size: 1.25em; /* 20px */
+    font-weight: 400;
+    color: var(--color-gray-40);
+  }
+
+  .cta__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em; /* 8px */
+  }
+
+  .cta__list-item {
+    display: flex;
+    align-items: center;
+    gap: 1em; /* 16px */
+    font-family: var(--font-body);
+    font-size: 1.25em; /* 20px */
+    font-weight: 300;
+    color: var(--color-gray-40);
+  }
+
+  .cta__dot {
+    flex-shrink: 0;
+    width: 0.5em; /* 8px */
+    height: 0.5em;
+    border-radius: 50%;
+    background: var(--color-gold);
+  }
+
+  /* Form */
+  .cta__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em; /* 24px */
+    flex: 0 0 24em; /* ~383px */
+    max-width: 24em;
+  }
+
+  .cta__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+  }
+
+  .cta__label {
+    font-family: var(--font-body);
+    font-size: 1em; /* 16px */
+    font-weight: 300;
+    color: var(--color-gray-10);
+  }
+
+  .cta__input {
+    width: 100%;
+    height: 3em; /* 48px */
+    padding-inline: 1em; /* 16px */
+    background-color: var(--color-gray-80);
+    border: 1px solid var(--color-gray-10);
+    color: var(--color-gray-10);
+    font-family: var(--font-body);
+    font-size: 0.875em; /* 14px */
+    font-weight: 300;
+  }
+
+  .cta__input::placeholder {
+    color: var(--color-gray-10);
+    opacity: 0.7;
+  }
+
+  .cta__consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75em;
+    font-family: var(--font-body);
+    font-size: 1em; /* 16px */
+    font-weight: 300;
+    line-height: 1.3;
+    color: var(--color-gray-10);
+    cursor: pointer;
+  }
+
+  .cta__checkbox {
+    flex-shrink: 0;
+    width: 0.875em; /* 14px */
+    height: 0.875em;
+    margin-top: 0.25em;
+    accent-color: var(--color-gold);
+  }
+
+  .cta__submit {
+    width: 100%;
+    margin-top: 1em;
+  }
+
+  .cta__submit:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  .cta__status {
+    font-family: var(--font-body);
+    font-size: 1em;
+    font-weight: 400;
+    line-height: 1.4;
+    min-height: 1.4em;
+  }
+
+  .cta__status:empty {
+    display: none;
+  }
+
+  .cta__status[data-state="ok"] {
+    color: var(--color-gold);
+  }
+
+  .cta__status[data-state="error"] {
+    color: #ff8a8a;
+  }
+
+  @media (max-width: 991px) {
+    .cta__panel {
+      flex-direction: column;
+      gap: 2.5em;
+    }
+
+    .cta__text,
+    .cta__form {
+      flex: 1 1 100%;
+      max-width: none;
+    }
+  }
+</style>
+
+<script>
+  const form = document.querySelector(".cta__form") as HTMLFormElement | null;
+  const status = document.querySelector(".cta__status") as HTMLElement | null;
+  const submit = form?.querySelector(".cta__submit") as HTMLButtonElement | null;
+
+  const setStatus = (msg: string, state: "ok" | "error" | "") => {
+    if (!status) return;
+    status.textContent = msg;
+    status.dataset.state = state;
+  };
+
+  form?.addEventListener("submit", async (e) => {
+    if (!form.checkValidity()) return; // let native validation show
+    e.preventDefault();
+
+    const data = {
+      name: (form.elements.namedItem("name") as HTMLInputElement)?.value ?? "",
+      phone: (form.elements.namedItem("phone") as HTMLInputElement)?.value ?? "",
+      email: (form.elements.namedItem("email") as HTMLInputElement)?.value ?? "",
+      consent: (form.elements.namedItem("consent") as HTMLInputElement)?.checked ?? false,
+    };
+
+    if (submit) submit.disabled = true;
+    setStatus("Изпращане…", "");
+
+    try {
+      const res = await fetch("/api/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (res.ok && result.ok) {
+        form.reset();
+        setStatus("Благодарим! Кандидатурата ти е приета — ще се свържем с теб.", "ok");
+      } else {
+        setStatus("Възникна грешка при изпращането. Моля, опитай отново.", "error");
+      }
+    } catch {
+      setStatus("Няма връзка със сървъра. Провери интернет връзката и опитай отново.", "error");
+    } finally {
+      if (submit) submit.disabled = false;
+    }
+  });
+</script>

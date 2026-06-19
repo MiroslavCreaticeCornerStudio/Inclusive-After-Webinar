@@ -1,0 +1,227 @@
+---
+const leftCards = [
+  {
+    icon: "/assets/images/why-1.svg",
+    title: "Подкрепа при сложни сделки",
+    text: "Не оставаш сам, когато казусът изисква повече опит и стратегия.",
+  },
+  {
+    icon: "/assets/images/why-2.svg",
+    title: "Ясни правила и процес",
+    text: "Знаеш какво се очаква от теб и по какви стандарти работим.",
+  },
+];
+const rightCards = [
+  {
+    icon: "/assets/images/why-3.svg",
+    title: "Структура без хаос",
+    text: "Имаш система, която ти дава фокус, без да ти връзва ръцете.",
+  },
+  {
+    icon: "/assets/images/why-4.svg",
+    title: "Дългосрочния успех",
+    text: "Градиш собственото си име в среда с посока, стандарти и дългосрочна мисъл.",
+  },
+];
+---
+
+<section class="why" id="zashto-inclusive">
+  <div class="why__inner container">
+    <header class="why__header">
+      <h2 class="why__title">Защо INclusive?</h2>
+      <div class="why__intro">
+        <span class="gold-rule"></span>
+        <p class="why__intro-text">
+          INclusive е изграден върху идеята, че професионалният успех няма стойност, ако няма с кого
+          да го споделиш. Затова тук съчетаваме високи стандарти с човешко отношение, подкрепа и
+          култура, в която хората растат заедно.
+        </p>
+      </div>
+    </header>
+
+    <div class="why__content">
+      <div class="why__col">
+        {leftCards.map((card) => (
+          <article class="why-card">
+            <span class="why-card__icon">
+              <img src={card.icon} alt="" width="42" height="42" aria-hidden="true" />
+            </span>
+            <div class="why-card__body">
+              <h3 class="why-card__title">{card.title}</h3>
+              <span class="gold-rule"></span>
+              <p class="why-card__text">{card.text}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div class="why__media">
+        <img src="/assets/images/why-building.jpg" alt="Сграда на INclusive" width="480" height="549" loading="lazy" />
+      </div>
+
+      <div class="why__col">
+        {rightCards.map((card) => (
+          <article class="why-card">
+            <span class="why-card__icon">
+              <img src={card.icon} alt="" width="42" height="42" aria-hidden="true" />
+            </span>
+            <div class="why-card__body">
+              <h3 class="why-card__title">{card.title}</h3>
+              <span class="gold-rule"></span>
+              <p class="why-card__text">{card.text}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .why {
+    width: 100%;
+    background-color: var(--color-bg-dark);
+    padding-block: 5em; /* 80px */
+  }
+
+  .why__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3.5em; /* 56px */
+  }
+
+  .why__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5em; /* 24px */
+    max-width: 38.625em; /* 618px */
+    text-align: center;
+  }
+
+  .why__title {
+    font-family: var(--font-heading);
+    font-size: 3em; /* 48px */
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--color-gray-10);
+  }
+
+  .why__intro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75em; /* 12px */
+  }
+
+  .why__intro-text {
+    font-family: var(--font-body);
+    font-size: 1.25em; /* 20px */
+    font-weight: 300;
+    line-height: 1.4;
+    color: var(--color-gray-40);
+  }
+
+  .why__content {
+    display: flex;
+    align-items: stretch;
+    gap: 1.5em; /* 24px */
+    width: 100%;
+  }
+
+  .why__col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em; /* 24px */
+    flex: 1 1 0;
+  }
+
+  .why__media {
+    flex: 0 0 30em; /* 480px */
+    max-width: 30em;
+    border-radius: 0.25em;
+    overflow: hidden;
+  }
+
+  .why__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .why-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5em; /* 24px */
+    flex: 1 1 0;
+    padding: 1.5em; /* 24px */
+    background-color: rgba(57, 60, 70, 0.3);
+    border: 1px solid var(--color-gold);
+    text-align: center;
+  }
+
+  .why-card__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.125em; /* 66px */
+    height: 4.125em;
+    border: 1px solid rgba(216, 219, 222, 0.4);
+    flex-shrink: 0;
+  }
+
+  .why-card__icon img {
+    width: 2.625em; /* 42px */
+    height: 2.625em;
+  }
+
+  .why-card__body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75em; /* 12px */
+  }
+
+  .why-card__title {
+    font-family: var(--font-heading);
+    font-size: 1.5em; /* 24px */
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--color-gray-10);
+  }
+
+  .why-card__text {
+    font-family: var(--font-body);
+    font-size: 1.25em; /* 20px */
+    font-weight: 300;
+    line-height: 1.4;
+    color: var(--color-gray-40);
+  }
+
+  @media (max-width: 991px) {
+    .why__content {
+      flex-wrap: wrap;
+    }
+
+    .why__media {
+      order: -1;
+      flex: 1 1 100%;
+      max-width: none;
+      height: 22em;
+    }
+
+    .why__col {
+      flex: 1 1 calc(50% - 0.75em);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .why__col {
+      flex: 1 1 100%;
+    }
+  }
+</style>

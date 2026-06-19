@@ -1,0 +1,163 @@
+---
+const galleryImages = [
+  { src: "/assets/images/hero-1.jpg", cls: "hero__img--sm" },
+  { src: "/assets/images/hero-2.jpg", cls: "hero__img--md" },
+  { src: "/assets/images/hero-3.jpg", cls: "hero__img--lg" },
+  { src: "/assets/images/hero-4.jpg", cls: "hero__img--md" },
+  { src: "/assets/images/hero-5.jpg", cls: "hero__img--sm" },
+];
+---
+
+<section class="hero" id="top">
+  <div class="hero__heading container">
+    <h1 class="hero__title">
+      <span class="hero__title-light">Стани част от </span><span class="hero__title-gold">печелившия отбор!</span>
+    </h1>
+    <p class="hero__subtitle">
+      Чу кои са решенията и навиците зад най-бързо растящата имотна компания. Сега те каним да
+      извървиш пътя от зрител до ключов играч в нашия екип.
+    </p>
+  </div>
+
+  <div class="hero__gallery" aria-hidden="false">
+    <ul class="hero__track">
+      {galleryImages.map((img, i) => (
+        <li class={`hero__img ${img.cls}`}>
+          <img
+            src={img.src}
+            alt={`Екипът на INclusive — снимка ${i + 1}`}
+            width="461"
+            height="290"
+            loading={i === 2 ? "eager" : "lazy"}
+            decoding="async"
+          />
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .hero {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4em; /* 64px */
+    padding-top: 5em; /* 80px */
+    overflow-x: clip;
+  }
+
+  .hero__heading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75em; /* 12px */
+    text-align: center;
+  }
+
+  .hero__title {
+    font-family: var(--font-heading);
+    font-size: 3.5em; /* 56px */
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .hero__title-light {
+    color: var(--color-gray-20);
+  }
+
+  .hero__title-gold {
+    color: var(--color-gold);
+  }
+
+  .hero__subtitle {
+    max-width: 40.25em; /* 644px */
+    font-family: var(--font-body);
+    font-size: 1.25em; /* 20px */
+    font-weight: 300;
+    line-height: 1.4;
+    color: var(--color-gray-10);
+  }
+
+  /* Panoramic gallery — center largest, sides bleed off and fade to bg */
+  .hero__gallery {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .hero__track {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5em; /* 24px */
+    width: max-content;
+    margin-inline: auto;
+    min-width: 100%;
+  }
+
+  .hero__img {
+    flex-shrink: 0;
+    border-radius: 0.75em; /* 12px */
+    overflow: hidden;
+  }
+
+  .hero__img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero__img--sm {
+    width: 18.4375em; /* 295px */
+    height: 11.625em; /* 186px */
+  }
+
+  .hero__img--md {
+    width: 22.375em; /* 358px */
+    height: 15.75em; /* 252px */
+  }
+
+  .hero__img--lg {
+    width: 28.8125em; /* 461px */
+    height: 18.125em; /* 290px */
+  }
+
+  /* Edge fades to background */
+  .hero__gallery::before,
+  .hero__gallery::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 12.5em;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .hero__gallery::before {
+    left: 0;
+    background: linear-gradient(90deg, var(--color-bg-dark) 0%, rgba(33, 35, 43, 0) 100%);
+  }
+
+  .hero__gallery::after {
+    right: 0;
+    background: linear-gradient(270deg, var(--color-bg-dark) 0%, rgba(33, 35, 43, 0) 100%);
+  }
+
+  @media (max-width: 991px) {
+    .hero__title {
+      white-space: normal;
+      font-size: 2.75em; /* 44px */
+    }
+  }
+
+  @media (max-width: 479px) {
+    .hero__title {
+      font-size: 2em; /* 32px */
+    }
+  }
+</style>

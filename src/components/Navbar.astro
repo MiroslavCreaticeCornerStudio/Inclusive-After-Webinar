@@ -1,0 +1,198 @@
+---
+const links = [
+  { label: "За кого е", href: "#za-kogo-e" },
+  { label: "Какво те очаква", href: "#kakvo-te-ochakva" },
+  { label: "Работа при нас", href: "#rabota-pri-nas" },
+  { label: "Екип", href: "#ekip" },
+  { label: "Защо INclusive?", href: "#zashto-inclusive" },
+];
+---
+
+<header class="navbar">
+  <div class="navbar__inner container">
+    <a class="navbar__logo" href="#top" aria-label="INclusive — недвижими имоти">
+      <img
+        src="/assets/images/logo.png"
+        alt="INclusive недвижими имоти"
+        width="138"
+        height="58"
+        decoding="async"
+      />
+    </a>
+
+    <button
+      class="navbar__toggle"
+      type="button"
+      aria-label="Меню"
+      aria-expanded="false"
+      aria-controls="navbar-menu"
+    >
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="navbar__menu" id="navbar-menu" aria-label="Основна навигация">
+      <ul class="navbar__links">
+        {links.map((link) => (
+          <li><a href={link.href}>{link.label}</a></li>
+        ))}
+      </ul>
+      <a class="btn btn--outline navbar__cta" href="#kandidatstvay">Кандидатствай сега</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    width: 100%;
+    background-color: var(--color-bg-dark);
+    border-bottom: 1px solid var(--color-gold);
+  }
+
+  .navbar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 5.625em; /* 90px */
+    gap: 2.5em;
+  }
+
+  .navbar__logo {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .navbar__logo img {
+    width: 8.6425em; /* 138.28px */
+    height: auto;
+  }
+
+  .navbar__menu {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    gap: 2.5em;
+  }
+
+  .navbar__links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5em; /* 40px */
+    flex: 1;
+  }
+
+  .navbar__links a {
+    font-family: var(--font-body);
+    font-size: 1.125em; /* 18px */
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+  }
+
+  .navbar__links a:hover {
+    color: var(--color-gold);
+  }
+
+  .navbar__cta {
+    flex-shrink: 0;
+  }
+
+  /* Hamburger toggle — hidden on desktop */
+  .navbar__toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 2.75em;
+    height: 2.75em;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+  }
+
+  .navbar__toggle span {
+    display: block;
+    width: 1.625em;
+    height: 2px;
+    margin-inline: auto;
+    background-color: var(--color-text-primary);
+    transition: transform var(--transition-base), opacity var(--transition-base);
+  }
+
+  /* Tablet & below — collapse to mobile menu */
+  @media (max-width: 991px) {
+    .navbar__toggle {
+      display: flex;
+    }
+
+    .navbar__menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1.5em;
+      padding: 1.5em var(--container-padding) 2em;
+      background-color: var(--color-bg-dark);
+      border-bottom: 1px solid var(--color-gold);
+      transform: translateY(-150%);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform var(--transition-base), opacity var(--transition-base);
+    }
+
+    .navbar__menu.is-open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .navbar__links {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.25em;
+    }
+
+    .navbar__cta {
+      width: 100%;
+    }
+
+    .navbar[data-open="true"] .navbar__toggle span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .navbar[data-open="true"] .navbar__toggle span:nth-child(2) {
+      opacity: 0;
+    }
+    .navbar[data-open="true"] .navbar__toggle span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+  }
+</style>
+
+<script>
+  const navbar = document.querySelector(".navbar");
+  const toggle = navbar?.querySelector(".navbar__toggle");
+  const menu = navbar?.querySelector(".navbar__menu");
+
+  toggle?.addEventListener("click", () => {
+    const open = navbar?.getAttribute("data-open") === "true";
+    navbar?.setAttribute("data-open", String(!open));
+    toggle.setAttribute("aria-expanded", String(!open));
+    menu?.classList.toggle("is-open", !open);
+  });
+
+  // Close menu when a link is clicked (mobile)
+  menu?.querySelectorAll("a").forEach((a) =>
+    a.addEventListener("click", () => {
+      navbar?.setAttribute("data-open", "false");
+      toggle?.setAttribute("aria-expanded", "false");
+      menu?.classList.remove("is-open");
+    })
+  );
+</script>

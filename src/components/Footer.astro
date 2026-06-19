@@ -1,0 +1,153 @@
+---
+const links = [
+  { label: "За кого е", href: "#za-kogo-e" },
+  { label: "Какво те очаква", href: "#kakvo-te-ochakva" },
+  { label: "Работа при нас", href: "#rabota-pri-nas" },
+  { label: "Екип", href: "#ekip" },
+  { label: "Защо INclusive?", href: "#zashto-inclusive" },
+];
+---
+
+<footer class="footer">
+  <div class="footer__frame container">
+    <a class="footer__logo" href="#top" aria-label="INclusive — недвижими имоти">
+      <img src="/assets/images/logo.png" alt="INclusive недвижими имоти" width="143" height="60" decoding="async" />
+    </a>
+
+    <nav class="footer__links" aria-label="Навигация във футъра">
+      {links.map((link) => <a href={link.href}>{link.label}</a>)}
+    </nav>
+
+    <div class="footer__contact">
+      <p class="footer__contact-item">
+        <svg class="footer__icon" viewBox="0 0 24 24" width="15" height="19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z" />
+          <circle cx="12" cy="10" r="2.5" />
+        </svg>
+        <span>гр. София, бул. Тодор Александров №71 /метростанция "Опълченска"/</span>
+      </p>
+      <a class="footer__contact-item" href="tel:070030101">
+        <svg class="footer__icon" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" />
+        </svg>
+        <span>0700 30 101</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer__copyright">
+    <div class="footer__copyright-inner container">
+      <a class="footer__privacy" href="#">Защита на личните данни</a>
+      <span class="footer__company">“Инклузив България” АД, 2026 година</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    width: 100%;
+    background-color: var(--color-bg-dark);
+    padding-top: 4.5em;
+  }
+
+  .footer__frame {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.6875em; /* 43px */
+    padding: 3.25em 2em;
+    border: 1px solid var(--color-gold);
+    margin-bottom: 3.5em;
+  }
+
+  .footer__logo img {
+    width: 8.9375em; /* 143px */
+    height: auto;
+  }
+
+  .footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2.5em; /* 40px */
+  }
+
+  .footer__links a {
+    font-family: var(--font-body);
+    font-size: 1.125em; /* 18px */
+    font-weight: 400;
+    color: var(--color-gray-10);
+    white-space: nowrap;
+  }
+
+  .footer__links a:hover {
+    color: var(--color-gold);
+  }
+
+  .footer__contact {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5em; /* 24px */
+  }
+
+  .footer__contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75em; /* 12px */
+    font-family: var(--font-body);
+    font-size: 1em; /* 16px */
+    font-weight: 300;
+    color: var(--color-gray-10);
+  }
+
+  .footer__icon {
+    flex-shrink: 0;
+    color: var(--color-gold);
+  }
+
+  .footer__copyright {
+    width: 100%;
+    background-color: var(--color-gold);
+  }
+
+  .footer__copyright-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5em;
+    padding-block: 0.75em;
+  }
+
+  .footer__privacy,
+  .footer__company {
+    font-family: var(--font-body);
+    font-size: 1.0625em; /* 17px */
+    font-weight: 400;
+    color: var(--color-gray-100);
+  }
+
+  .footer__privacy {
+    text-decoration: underline;
+  }
+
+  .footer__company {
+    text-align: right;
+  }
+
+  @media (max-width: 767px) {
+    .footer__links {
+      gap: 1.25em;
+    }
+
+    .footer__copyright-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5em;
+    }
+
+    .footer__company {
+      text-align: left;
+    }
+  }
+</style>

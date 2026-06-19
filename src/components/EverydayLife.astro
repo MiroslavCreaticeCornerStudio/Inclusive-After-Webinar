@@ -1,0 +1,151 @@
+---
+const items = [
+  {
+    title: "Директна комуникация",
+    text: "Разговори с купувачи, продавачи и партньори на пазара.",
+    active: true,
+  },
+  { title: "Работа на терен" },
+  { title: "Професионална подготовка" },
+  { title: "Следене на пазара" },
+  { title: "Реални преговори" },
+  { title: "Екипна култура" },
+];
+---
+
+<section class="everyday" id="rabota-pri-nas">
+  <div class="everyday__inner container">
+    <div class="everyday__text">
+      <div class="everyday__head">
+        <h2 class="everyday__title">Как ще изглежда ежедневието ти в INclusive?</h2>
+      </div>
+      <ul class="everyday__list">
+        {items.map((item) => (
+          <li class={`everyday__item${item.active ? " is-active" : ""}`}>
+            <h3 class="everyday__item-title">{item.title}</h3>
+            {item.text && <p class="everyday__item-text">{item.text}</p>}
+            {item.active && <span class="everyday__item-rule"></span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="everyday__media">
+      <img src="/assets/images/everyday.jpg" alt="Брокер на INclusive в ежедневието си" width="608" height="683" loading="lazy" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .everyday {
+    width: 100%;
+    background-color: var(--color-gray-40);
+    padding-block: 5em; /* 80px */
+  }
+
+  .everyday__inner {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 4em;
+  }
+
+  .everyday__text {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.625em;
+    flex: 1 1 37.75em; /* 604px */
+    max-width: 37.75em;
+  }
+
+  .everyday__head {
+    display: flex;
+    align-items: center;
+    min-height: 11em; /* 176px */
+  }
+
+  .everyday__title {
+    font-family: var(--font-heading);
+    font-size: 3em; /* 48px */
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--color-gray-100);
+  }
+
+  .everyday__list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .everyday__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em; /* 12px */
+    padding-bottom: 1.5em; /* 24px */
+    border-bottom: 1px solid #c4c5c7;
+  }
+
+  .everyday__item + .everyday__item {
+    padding-top: 1.5em;
+  }
+
+  .everyday__item-title {
+    font-family: var(--font-heading);
+    font-size: 1.5em; /* 24px */
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--color-gray-100);
+  }
+
+  .everyday__item-text {
+    font-family: var(--font-body);
+    font-size: 1.25em; /* 20px */
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--color-gray-80);
+  }
+
+  .everyday__item-rule {
+    display: block;
+    width: 11.6875em; /* 187px */
+    height: 3px;
+    background: var(--color-gold);
+  }
+
+  .everyday__media {
+    flex: 0 0 38em; /* 608px */
+    max-width: 38em;
+    border-radius: 0.25em;
+    overflow: hidden;
+  }
+
+  .everyday__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 991px) {
+    .everyday__inner {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .everyday__head {
+      min-height: 0;
+    }
+
+    .everyday__title {
+      font-size: 2.25em; /* 36px */
+    }
+
+    .everyday__media {
+      flex: none;
+      max-width: none;
+      height: 30em;
+    }
+  }
+</style>

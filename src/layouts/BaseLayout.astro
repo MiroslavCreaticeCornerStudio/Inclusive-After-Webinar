@@ -1,0 +1,64 @@
+---
+import "../styles/global.css";
+
+export interface Props {
+  title?: string;
+  description?: string;
+  lang?: string;
+  ogImage?: string;
+}
+
+const {
+  title = "INclusive",
+  description = "",
+  lang = "bg",
+  ogImage = "/assets/images/hero-3.jpg",
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://inclusive.bg");
+const ogImageUrl = new URL(ogImage, Astro.site ?? "https://inclusive.bg");
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#21232b" />
+
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
+
+    {/* Open Graph */}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="INclusive" />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:locale" content="bg_BG" />
+
+    {/* Twitter */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    {/* Fonts — Montserrat (Cyrillic-capable) substitutes Le Havre / Futura PT */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+    />
+
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="sr-only" href="#top">Към съдържанието</a>
+    <slot />
+  </body>
+</html>
