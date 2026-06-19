@@ -31,21 +31,27 @@ const beliefs = [
     <form class="cta__form" method="post" action="/api/apply" novalidate>
       <div class="cta__field">
         <label class="cta__label" for="cta-name">Имена:</label>
-        <input class="cta__input" id="cta-name" name="name" type="text" placeholder="Име Фамилия" autocomplete="name" required />
+        <input class="cta__input" id="cta-name" name="name" type="text" placeholder="Име Фамилия" autocomplete="name" required aria-describedby="cta-name-error" />
+        <span class="cta__error" id="cta-name-error" aria-live="polite"></span>
       </div>
       <div class="cta__field">
         <label class="cta__label" for="cta-phone">Телефон:</label>
-        <input class="cta__input" id="cta-phone" name="phone" type="tel" placeholder="Телефон" autocomplete="tel" required />
+        <input class="cta__input" id="cta-phone" name="phone" type="tel" placeholder="Телефон" autocomplete="tel" required aria-describedby="cta-phone-error" />
+        <span class="cta__error" id="cta-phone-error" aria-live="polite"></span>
       </div>
       <div class="cta__field">
         <label class="cta__label" for="cta-email">Имейл</label>
-        <input class="cta__input" id="cta-email" name="email" type="email" placeholder="Имейл адрес" autocomplete="email" required />
+        <input class="cta__input" id="cta-email" name="email" type="email" placeholder="Имейл адрес" autocomplete="email" required aria-describedby="cta-email-error" />
+        <span class="cta__error" id="cta-email-error" aria-live="polite"></span>
       </div>
 
-      <label class="cta__consent">
-        <input class="cta__checkbox" type="checkbox" name="consent" required />
-        <span>Давам съгласието си данните ми да бъдат обработени съгласно приложения формуляр</span>
-      </label>
+      <div class="cta__consent-field">
+        <label class="cta__consent">
+          <input class="cta__checkbox" type="checkbox" name="consent" required aria-describedby="cta-consent-error" />
+          <span>Давам съгласието си данните ми да бъдат обработени съгласно приложения формуляр</span>
+        </label>
+        <span class="cta__error" id="cta-consent-error" aria-live="polite"></span>
+      </div>
 
       <button class="btn cta__submit" type="submit">Кандидатствай сега!</button>
       <p class="cta__status" role="status" aria-live="polite"></p>
@@ -172,6 +178,29 @@ const beliefs = [
     opacity: 0.7;
   }
 
+  .cta__input[aria-invalid="true"] {
+    border-color: #ff8a8a;
+  }
+
+  .cta__consent-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+  }
+
+  .cta__error {
+    display: none;
+    font-family: var(--font-body);
+    font-size: 0.875em; /* 14px */
+    font-weight: 400;
+    line-height: 1.3;
+    color: #ff8a8a;
+  }
+
+  .cta__error:not(:empty) {
+    display: block;
+  }
+
   .cta__consent {
     display: flex;
     align-items: flex-start;
@@ -241,43 +270,109 @@ const beliefs = [
   const status = document.querySelector(".cta__status") as HTMLElement | null;
   const submit = form?.querySelector(".cta__submit") as HTMLButtonElement | null;
 
-  const setStatus = (msg: string, state: "ok" | "error" | "") => {
-    if (!status) return;
-    status.textContent = msg;
-    status.dataset.state = state;
-  };
+  if (form) {
+    const fields = ["name", "phone", "email", "consent"] as const;
+    type FieldName = (typeof fields)[number];
 
-  form?.addEventListener("submit", async (e) => {
-    if (!form.checkValidity()) return; // let native validation show
-    e.preventDefault();
-
-    const data = {
-      name: (form.elements.namedItem("name") as HTMLInputElement)?.value ?? "",
-      phone: (form.elements.namedItem("phone") as HTMLInputElement)?.value ?? "",
-      email: (form.elements.namedItem("email") as HTMLInputElement)?.value ?? "",
-      consent: (form.elements.namedItem("consent") as HTMLInputElement)?.checked ?? false,
+    const messages: Record<FieldName, string> = {
+      name: "Моля, въведи името и фамилията си.",
+      phone: "Моля, въведи валиден телефонен номер.",
+      email: "Моля, въведи валиден имейл адрес.",
+      consent: "Необходимо е съгласие, за да продължиш.",
     };
 
-    if (submit) submit.disabled = true;
-    setStatus("Изпращане…", "");
+    const emailRe = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    const phoneRe = /^[+\d][\d\s\-()]*$/;
 
-    try {
-      const res = await fetch("/api/apply", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json().catch(() => ({}));
-      if (res.ok && result.ok) {
-        form.reset();
-        setStatus("Благодарим! Кандидатурата ти е приета — ще се свържем с теб.", "ok");
+    const field = (name: FieldName) =>
+      form.elements.namedItem(name) as HTMLInputElement;
+
+    const isValid = (name: FieldName): boolean => {
+      const el = field(name);
+      if (name === "consent") return el.checked;
+      const v = (el.value || "").trim();
+      if (name === "name") return v.length >= 2;
+      if (name === "email") return emailRe.test(v);
+      if (name === "phone") return phoneRe.test(v) && v.replace(/\D/g, "").length >= 6;
+      return true;
+    };
+
+    const showError = (name: FieldName, show: boolean) => {
+      const el = field(name);
+      const err = document.getElementById(`cta-${name}-error`);
+      if (show) {
+        el.setAttribute("aria-invalid", "true");
+        if (err) err.textContent = messages[name];
       } else {
-        setStatus("Възникна грешка при изпращането. Моля, опитай отново.", "error");
+        el.removeAttribute("aria-invalid");
+        if (err) err.textContent = "";
       }
-    } catch {
-      setStatus("Няма връзка със сървъра. Провери интернет връзката и опитай отново.", "error");
-    } finally {
-      if (submit) submit.disabled = false;
-    }
-  });
+    };
+
+    const validateField = (name: FieldName): boolean => {
+      const ok = isValid(name);
+      showError(name, !ok);
+      return ok;
+    };
+
+    // Validate text fields on blur; clear the error live once corrected.
+    (["name", "phone", "email"] as FieldName[]).forEach((name) => {
+      const el = field(name);
+      el.addEventListener("blur", () => validateField(name));
+      el.addEventListener("input", () => {
+        if (el.getAttribute("aria-invalid")) validateField(name);
+      });
+    });
+    field("consent").addEventListener("change", () => validateField("consent"));
+
+    const setStatus = (msg: string, state: "ok" | "error" | "") => {
+      if (!status) return;
+      status.textContent = msg;
+      status.dataset.state = state;
+    };
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      let firstInvalid: HTMLElement | null = null;
+      for (const name of fields) {
+        if (!validateField(name) && !firstInvalid) firstInvalid = field(name);
+      }
+      if (firstInvalid) {
+        setStatus("", "");
+        firstInvalid.focus();
+        return;
+      }
+
+      const data = {
+        name: field("name").value.trim(),
+        phone: field("phone").value.trim(),
+        email: field("email").value.trim(),
+        consent: field("consent").checked,
+      };
+
+      if (submit) submit.disabled = true;
+      setStatus("Изпращане…", "");
+
+      try {
+        const res = await fetch("/api/apply", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const result = await res.json().catch(() => ({}));
+        if (res.ok && result.ok) {
+          form.reset();
+          fields.forEach((n) => showError(n, false));
+          setStatus("Благодарим! Кандидатурата ти е приета — ще се свържем с теб.", "ok");
+        } else {
+          setStatus("Възникна грешка при изпращането. Моля, опитай отново.", "error");
+        }
+      } catch {
+        setStatus("Няма връзка със сървъра. Провери интернет връзката и опитай отново.", "error");
+      } finally {
+        if (submit) submit.disabled = false;
+      }
+    });
+  }
 </script>
