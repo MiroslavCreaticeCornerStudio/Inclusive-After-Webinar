@@ -45,13 +45,13 @@ async function getZoomToken(): Promise<string> {
   return data.access_token;
 }
 
-/** Register the applicant as a webinar registrant. */
+/** Register the applicant as a webinar registrant. Returns the unique join URL. */
 async function registerZoom(input: {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-}): Promise<void> {
+}): Promise<string> {
   const token = await getZoomToken();
   const webinarId = ZOOM_WEBINAR_ID.replace(/\s+/g, "");
   const body: Record<string, string> = {
@@ -69,7 +69,14 @@ async function registerZoom(input: {
   if (!res.ok) {
     throw new Error(`zoom_register ${res.status}: ${await res.text()}`);
   }
+  const data = (await res.json()) as { join_url?: string };
+  return data.join_url ?? "";
 }
+
+// Brevo custom field (text) that stores the registrant's unique Zoom join link.
+const BREVO_ZOOM_LINK_ATTR = "ZOOM_JOIN_URL";
+// Brevo text field for the raw phone (reliable — unlike SMS it has no E.164 validation).
+const BREVO_PHONE_ATTR = "TELEFON";
 
 /** Create/update the contact in Brevo and add to the configured list. */
 async function addBrevo(input: {
@@ -77,11 +84,15 @@ async function addBrevo(input: {
   lastName: string;
   email: string;
   phone: string;
+  joinUrl: string;
 }): Promise<void> {
   const baseAttrs: Record<string, string> = {
     FIRSTNAME: input.firstName,
     LASTNAME: input.lastName,
   };
+  if (input.phone) baseAttrs[BREVO_PHONE_ATTR] = input.phone;
+  if (input.joinUrl) baseAttrs[BREVO_ZOOM_LINK_ATTR] = input.joinUrl;
+
   const post = (attributes: Record<string, string>) =>
     fetch("https://api.brevo.com/v3/contacts", {
       method: "POST",
@@ -144,17 +155,24 @@ export const POST: APIRoute = async ({ request }) => {
   const lastName = rest.join(" ");
   const payload = { firstName, lastName, email, phone };
 
-  const [zoom, brevo] = await Promise.allSettled([
-    registerZoom(payload),
-    addBrevo(payload),
-  ]);
+  // Zoom first — its response carries the unique join URL we pass to Brevo.
+  let zoomOk = false;
+  let joinUrl = "";
+  try {
+    joinUrl = await registerZoom(payload);
+    zoomOk = true;
+  } catch (e) {
+    console.error("[apply] Zoom failed:", (e as Error)?.message);
+  }
 
-  const zoomOk = zoom.status === "fulfilled";
-  const brevoOk = brevo.status === "fulfilled";
-
-  // Log failures server-side (never the secrets) so the owner can diagnose.
-  if (!zoomOk) console.error("[apply] Zoom failed:", (zoom as PromiseRejectedResult).reason?.message);
-  if (!brevoOk) console.error("[apply] Brevo failed:", (brevo as PromiseRejectedResult).reason?.message);
+  // Brevo second — store the join URL in the ZOOM_JOIN_URL custom field.
+  let brevoOk = false;
+  try {
+    await addBrevo({ ...payload, joinUrl });
+    brevoOk = true;
+  } catch (e) {
+    console.error("[apply] Brevo failed:", (e as Error)?.message);
+  }
 
   // The lead is captured if at least one integration succeeded.
   if (!zoomOk && !brevoOk) {

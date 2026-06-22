@@ -44,10 +44,24 @@ Configured for **Vercel** (`@astrojs/vercel` adapter). To deploy:
 Deploying elsewhere? Swap the adapter in `astro.config.mjs`:
 `@astrojs/node` (`{ mode: 'standalone' }`) for any Node host, or `@astrojs/netlify` for Netlify.
 
+## Brevo contact fields written
+
+| Brevo attribute | Source |
+|---|---|
+| `FIRSTNAME` / `LASTNAME` | split from the name field |
+| `TELEFON` | raw phone (reliable text field) |
+| `SMS` | normalized phone (best-effort; dropped if Brevo rejects the format) |
+| `ZOOM_JOIN_URL` | the registrant's **unique Zoom join link** (from the Zoom API response) |
+
+Because the join link comes from the Zoom registration response, the endpoint calls **Zoom first**,
+captures `join_url`, then writes the Brevo contact. If Zoom fails, the contact is still saved
+(without the link). The Brevo field names are constants at the top of `addBrevo()` in `apply.ts`.
+
 ## Behaviour notes
 
 - **Phone → Brevo SMS**: normalized to E.164 (Bulgarian `+359` default). If Brevo rejects the
-  format, the contact is still saved without the SMS field (automatic retry).
+  format, the contact is still saved without the SMS field (automatic retry). The phone is always
+  kept in the `TELEFON` text field regardless.
 - **Duplicate email**: Brevo updates the existing contact (`updateEnabled: true`).
 - **Diagnosing failures**: check the function logs (Vercel → Deployments → Functions, or the local
   `astro dev` console) for `[apply] Zoom failed:` / `[apply] Brevo failed:` lines.
@@ -58,6 +72,7 @@ End-to-end tests created two entries — please remove them from Zoom registrant
 
 - `inclusive.form.test@example.com` — "Тест Кандидатура"
 - `inclusive.form.test2@example.com` — "Тест Браузър"
+- `inclusive.zoomlink.test@example.com` — "Тест ЗумЛинк"
 
 ## ⚠️ Rotate the secrets
 
