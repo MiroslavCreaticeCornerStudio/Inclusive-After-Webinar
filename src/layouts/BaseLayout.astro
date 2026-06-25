@@ -58,6 +58,10 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? "https://inclusive.bg");
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
     />
 
+    {/* GSAP — loaded as globals for the light scroll-reveal init at the end of <body> */}
+    <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
     <slot name="head" />
   </head>
   <body>
@@ -96,6 +100,82 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? "https://inclusive.bg");
         } catch (e) {
           /* localStorage unavailable — ignore */
         }
+      })();
+    </script>
+
+    <!-- Light scroll-reveal animations (GSAP). Skipped entirely for reduced-motion;
+         if GSAP fails to load, nothing is hidden and the page renders normally. -->
+    <script is:inline>
+      (function () {
+        if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") return;
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
+          var ease = "power2.out";
+
+          // Hero intro on load
+          gsap
+            .timeline({ defaults: { ease: ease, duration: 0.9 } })
+            .from(".hero__title", { y: 24, autoAlpha: 0 })
+            .from(".hero__subtitle", { y: 20, autoAlpha: 0 }, "-=0.6")
+            .from(".hero__img", { y: 24, autoAlpha: 0, stagger: 0.08, duration: 0.7 }, "-=0.5");
+
+          // Section headings / intros — fade up as they enter (once)
+          gsap.utils
+            .toArray(
+              ".ta__header, .expect__header, .everyday__head, .testimonials__header, .why__header, .cta__text, .footer__frame"
+            )
+            .forEach(function (el) {
+              gsap.from(el, {
+                y: 28,
+                autoAlpha: 0,
+                duration: 0.9,
+                ease: ease,
+                scrollTrigger: { trigger: el, start: "top 85%", once: true },
+              });
+            });
+
+          // Grouped staggers — cards / list items reveal as the group enters
+          [
+            { trigger: ".ta__grid", targets: ":scope > *" },
+            { trigger: ".expect__track", targets: ".expect__card" },
+            { trigger: ".everyday__list", targets: ".everyday__item" },
+            { trigger: ".testimonials__grid", targets: ".testimonial" },
+            { trigger: ".why__content", targets: ".why-card, .why__media" },
+          ].forEach(function (g) {
+            var t = document.querySelector(g.trigger);
+            if (!t) return;
+            gsap.from(t.querySelectorAll(g.targets), {
+              y: 30,
+              autoAlpha: 0,
+              duration: 0.7,
+              ease: ease,
+              stagger: 0.08,
+              scrollTrigger: { trigger: t, start: "top 85%", once: true },
+            });
+          });
+
+          // Standalone content image
+          gsap.utils.toArray(".everyday__media").forEach(function (el) {
+            gsap.from(el, {
+              autoAlpha: 0,
+              y: 20,
+              duration: 1,
+              ease: ease,
+              scrollTrigger: { trigger: el, start: "top 85%", once: true },
+            });
+          });
+
+          // Recalculate trigger positions once fonts/images settle
+          if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(function () {
+              ScrollTrigger.refresh();
+            });
+          }
+          window.addEventListener("load", function () {
+            ScrollTrigger.refresh();
+          });
+        });
       })();
     </script>
   </body>
