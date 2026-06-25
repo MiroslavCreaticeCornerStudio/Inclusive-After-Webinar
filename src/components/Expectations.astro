@@ -65,6 +65,15 @@ const cards = [
     <div class="expect__progress" aria-hidden="true">
       <span class="expect__progress-bar"></span>
     </div>
+
+    <div class="expect__nav">
+      <button class="expect__arrow" type="button" data-dir="prev" aria-label="Предишна карта">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+      </button>
+      <button class="expect__arrow" type="button" data-dir="next" aria-label="Следваща карта">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+      </button>
+    </div>
   </div>
 </section>
 
@@ -181,6 +190,25 @@ const cards = [
     background-color: var(--color-gold);
   }
 
+  /* Carousel nav arrows — mobile only */
+  .expect__nav {
+    display: none;
+    gap: 1em;
+    justify-content: center;
+  }
+
+  .expect__arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6875em; /* 43px */
+    height: 2.6875em;
+    background: var(--color-gold);
+    color: var(--color-gray-100);
+    border: none;
+    cursor: pointer;
+  }
+
   @media (max-width: 767px) {
     .expect__header {
       flex-direction: column;
@@ -188,18 +216,57 @@ const cards = [
       gap: 1.5em;
     }
 
+    .expect__title {
+      font-size: 1.875em; /* ~30px */
+    }
+
+    .expect__cta {
+      width: 100%;
+    }
+
+    .expect__scroll {
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+    }
+
+    .expect__track {
+      gap: 1em;
+    }
+
     .expect__card {
-      width: 20em;
+      width: 84vw;
+      max-width: 20em;
+      border-left: 1px solid var(--color-gray-60);
+      scroll-snap-align: start;
+    }
+
+    .expect__card-title {
+      font-size: 1.5em; /* ~24px */
+    }
+
+    .expect__card-text {
+      font-size: 1.125em; /* ~18px */
+    }
+
+    .expect__progress {
+      align-self: stretch;
+      width: 100%;
+    }
+
+    .expect__nav {
+      display: flex;
     }
   }
 </style>
 
 <script>
-  const scroller = document.querySelector(".expect__scroll");
+  const scroller = document.querySelector(".expect__scroll") as HTMLElement | null;
   const bar = document.querySelector(".expect__progress-bar") as HTMLElement | null;
+  const arrows = document.querySelectorAll<HTMLButtonElement>(".expect__arrow");
 
-  if (scroller && bar) {
+  if (scroller) {
     const update = () => {
+      if (!bar) return;
       const max = scroller.scrollWidth - scroller.clientWidth;
       const ratio = max > 0 ? scroller.scrollLeft / max : 0;
       const travel = 100 - 38; // bar is 38% wide
@@ -208,5 +275,19 @@ const cards = [
     scroller.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
     update();
+
+    // Prev/next arrows scroll by one card width (+ gap).
+    const step = () => {
+      const card = scroller.querySelector(".expect__card") as HTMLElement | null;
+      const track = scroller.querySelector(".expect__track") as HTMLElement | null;
+      const gap = track ? parseFloat(getComputedStyle(track).columnGap) || 0 : 0;
+      return card ? card.offsetWidth + gap : scroller.clientWidth;
+    };
+    arrows.forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const dir = btn.dataset.dir === "prev" ? -1 : 1;
+        scroller.scrollBy({ left: dir * step(), behavior: "smooth" });
+      }),
+    );
   }
 </script>

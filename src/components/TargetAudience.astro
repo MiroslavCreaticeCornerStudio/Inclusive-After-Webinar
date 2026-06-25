@@ -1,5 +1,28 @@
 ---
-// Section: "За кого е" — who we're looking for
+// Section: "За кого е" — who we're looking for.
+// Each card has a description; on desktop only the accent card shows it (others reveal the
+// same copy on mobile, matching the dedicated mobile design).
+const cards = [
+  {
+    title: "Притежаваш характер и отговорност",
+    text: "Знаеш, че университетът и дипломата не правят добрия брокер. Залагаш на почтеността и искаш да бъдеш истинското лице на доверието за своите клиенти.",
+    mobileAccent: true,
+  },
+  {
+    title: "Имаш търговски нюх и постоянство",
+    text: "Имаш вътрешен устрем за продажби и си готов да действаш ден след ден, сделка след сделка, за да стигнеш целите, които си поставил.",
+    accent: true,
+  },
+  {
+    title: "Залагаш на самодисциплина и развитие",
+    text: "Вярваш, че най-добрата инвестиция е в собствените ти умения, готов си да учиш постоянно и търсиш опора, за да движиш кариерата си напред.",
+  },
+  {
+    title: "Вярваш в екипността и общите успехи",
+    text: "Писнало ти е от вътрешна конкуренция и търсиш силен отбор, в който хората си споделят опит, пазят си гърба и растат заедно на пазара.",
+  },
+];
+const [card1, card2, card3, card4] = cards;
 ---
 
 <section class="ta" id="za-kogo-e">
@@ -18,28 +41,26 @@
       <div class="ta__media">
         <img src="/assets/images/target-1.jpg" alt="Екип на INclusive в офиса" width="399" height="301" loading="lazy" />
       </div>
-      <article class="ta__card">
-        <span class="gold-rule"></span>
-        <h3 class="ta__card-title">Притежаваш характер и отговорност</h3>
-      </article>
-      <article class="ta__card ta__card--accent">
-        <span class="gold-rule"></span>
-        <h3 class="ta__card-title ta__card-title--gold">Имаш търговски нюх и постоянство</h3>
-        <p class="ta__card-text">
-          Имаш вътрешен устрем за продажби и си готов да действаш ден след ден, сделка след сделка,
-          за да стигнеш целите, които си поставил.
-        </p>
-      </article>
+      {[card1, card2].map((c) => (
+        <article class={`ta__card${c.accent ? " ta__card--accent" : ""}${c.mobileAccent ? " ta__card--m-accent" : ""}`}>
+          <span class="gold-rule"></span>
+          <div class="ta__card-body">
+            <h3 class="ta__card-title">{c.title}</h3>
+            <p class="ta__card-text">{c.text}</p>
+          </div>
+        </article>
+      ))}
 
       <!-- Row 2 -->
-      <article class="ta__card">
-        <span class="gold-rule"></span>
-        <h3 class="ta__card-title">Залагаш на самодисциплина и развитие</h3>
-      </article>
-      <article class="ta__card">
-        <span class="gold-rule"></span>
-        <h3 class="ta__card-title">Вярваш в екипността и общите успехи</h3>
-      </article>
+      {[card3, card4].map((c) => (
+        <article class="ta__card">
+          <span class="gold-rule"></span>
+          <div class="ta__card-body">
+            <h3 class="ta__card-title">{c.title}</h3>
+            <p class="ta__card-text">{c.text}</p>
+          </div>
+        </article>
+      ))}
       <div class="ta__media">
         <img src="/assets/images/target-2.jpg" alt="Среща на брокери от INclusive" width="399" height="303" loading="lazy" />
       </div>
@@ -116,6 +137,12 @@
     background-color: var(--color-gray-20);
   }
 
+  .ta__card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+  }
+
   .ta__card-title {
     font-family: var(--font-heading);
     font-size: 1.75em; /* 28px */
@@ -123,20 +150,10 @@
     line-height: 1.3;
     text-transform: uppercase;
     color: var(--color-gray-100);
-    margin-top: auto;
-  }
-
-  .ta__card-title--gold {
-    color: var(--color-gold-deep);
-  }
-
-  .ta__card--accent {
-    justify-content: flex-end;
-    gap: 0.75em;
   }
 
   .ta__card--accent .ta__card-title {
-    margin-top: 0;
+    color: var(--color-gold-deep);
   }
 
   .ta__card-text {
@@ -145,6 +162,11 @@
     font-weight: 300;
     line-height: 1.3;
     color: var(--color-gray-80);
+  }
+
+  /* Desktop: only the accent card shows its description */
+  .ta__card:not(.ta__card--accent) .ta__card-text {
+    display: none;
   }
 
   @media (max-width: 991px) {
@@ -156,10 +178,37 @@
   @media (max-width: 767px) {
     .ta__grid {
       grid-template-columns: 1fr;
+      gap: 1.5em;
     }
 
     .ta__card {
       min-height: auto;
+    }
+
+    /* Mobile design: every card shows its description, card 1 is the gold one */
+    .ta__card-text {
+      display: block;
+    }
+
+    .ta__card--accent .ta__card-title {
+      color: var(--color-gray-100);
+    }
+
+    .ta__card--m-accent .ta__card-title {
+      color: var(--color-gold-deep);
+    }
+
+    .ta__title {
+      font-size: 1.875em; /* ~30px */
+    }
+
+    .ta__card-title {
+      font-size: 1.375em; /* ~20px */
+    }
+
+    .ta__card-text,
+    .ta__subtitle {
+      font-size: 1.125em; /* ~18px */
     }
   }
 </style>

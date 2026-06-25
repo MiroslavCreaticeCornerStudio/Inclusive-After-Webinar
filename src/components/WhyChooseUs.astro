@@ -219,9 +219,38 @@ const rightCards = [
     }
   }
 
+  /* Mobile design: single column — header, card1, card2, image, card3, card4 */
   @media (max-width: 767px) {
+    .why__content {
+      flex-direction: column;
+    }
+
+    .why__media {
+      order: 0;
+      flex: none;
+      height: auto;
+    }
+
+    .why__media img {
+      height: auto;
+    }
+
     .why__col {
-      flex: 1 1 100%;
+      flex: none;
+      width: 100%;
+    }
+
+    .why__title {
+      font-size: 1.875em; /* ~30px */
+    }
+
+    .why-card__title {
+      font-size: 1.375em; /* ~22px */
+    }
+
+    .why__intro-text,
+    .why-card__text {
+      font-size: 1.125em; /* ~18px */
     }
   }
 </style>

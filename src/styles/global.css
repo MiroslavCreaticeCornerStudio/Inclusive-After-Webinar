@@ -30,7 +30,7 @@
     --size-container-ideal: 550;
     --size-container-min: 480px;
     --size-container-max: 767px;
-    --container-padding: 1em;
+    --container-padding: 1.25em; /* ~20px — matches mobile design */
   }
 }
 
@@ -40,7 +40,7 @@
     --size-container-ideal: 390;
     --size-container-min: 320px;
     --size-container-max: 479px;
-    --container-padding: 1em;
+    --container-padding: 1.25em; /* ~18px — matches mobile design */
   }
 }
 

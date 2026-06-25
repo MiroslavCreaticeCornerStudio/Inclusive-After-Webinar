@@ -15,24 +15,23 @@ const items = [
 
 <section class="everyday" id="rabota-pri-nas">
   <div class="everyday__inner container">
-    <div class="everyday__text">
-      <div class="everyday__head">
-        <h2 class="everyday__title">Как ще изглежда ежедневието ти в INclusive?</h2>
-      </div>
-      <ul class="everyday__list">
-        {items.map((item) => (
-          <li class={`everyday__item${item.active ? " is-active" : ""}`}>
-            <h3 class="everyday__item-title">{item.title}</h3>
-            {item.text && <p class="everyday__item-text">{item.text}</p>}
-            {item.active && <span class="everyday__item-rule"></span>}
-          </li>
-        ))}
-      </ul>
+    <div class="everyday__head">
+      <h2 class="everyday__title">Как ще изглежда ежедневието ти в INclusive?</h2>
     </div>
 
     <div class="everyday__media">
       <img src="/assets/images/everyday.jpg" alt="Брокер на INclusive в ежедневието си" width="608" height="683" loading="lazy" />
     </div>
+
+    <ul class="everyday__list">
+      {items.map((item) => (
+        <li class={`everyday__item${item.active ? " is-active" : ""}`}>
+          <h3 class="everyday__item-title">{item.title}</h3>
+          {item.text && <p class="everyday__item-text">{item.text}</p>}
+          {item.active && <span class="everyday__item-rule"></span>}
+        </li>
+      ))}
+    </ul>
   </div>
 </section>
 
@@ -44,25 +43,25 @@ const items = [
   }
 
   .everyday__inner {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 38em; /* text | image 608px */
+    grid-template-rows: auto 1fr;
+    column-gap: 4em;
     align-items: stretch;
-    justify-content: space-between;
-    gap: 4em;
-  }
-
-  .everyday__text {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 1.625em;
-    flex: 1 1 37.75em; /* 604px */
-    max-width: 37.75em;
   }
 
   .everyday__head {
+    grid-column: 1;
+    grid-row: 1;
     display: flex;
     align-items: center;
     min-height: 11em; /* 176px */
+  }
+
+  .everyday__list {
+    grid-column: 1;
+    grid-row: 2;
+    padding-top: 1.625em;
   }
 
   .everyday__title {
@@ -116,8 +115,8 @@ const items = [
   }
 
   .everyday__media {
-    flex: 0 0 38em; /* 608px */
-    max-width: 38em;
+    grid-column: 2;
+    grid-row: 1 / span 2;
     border-radius: 0.25em;
     overflow: hidden;
   }
@@ -128,24 +127,40 @@ const items = [
     object-fit: cover;
   }
 
+  /* Mobile design order: heading → image → list */
   @media (max-width: 991px) {
     .everyday__inner {
+      display: flex;
       flex-direction: column;
-      align-items: stretch;
+      gap: 1.5em;
     }
 
     .everyday__head {
+      order: 1;
       min-height: 0;
+    }
+
+    .everyday__media {
+      order: 2;
+    }
+
+    .everyday__media img {
+      height: auto;
+    }
+
+    .everyday__list {
+      order: 3;
+      padding-top: 0;
     }
 
     .everyday__title {
       font-size: 2.25em; /* 36px */
     }
+  }
 
-    .everyday__media {
-      flex: none;
-      max-width: none;
-      height: 30em;
+  @media (max-width: 767px) {
+    .everyday__title {
+      font-size: 1.875em; /* ~30px */
     }
   }
 </style>

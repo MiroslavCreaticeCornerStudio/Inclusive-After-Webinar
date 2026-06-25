@@ -44,6 +44,15 @@ const testimonials = [
         </li>
       ))}
     </ul>
+
+    <div class="testimonials__nav">
+      <button class="testimonials__arrow" type="button" data-dir="prev" aria-label="Предишен отзив">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+      </button>
+      <button class="testimonials__arrow" type="button" data-dir="next" aria-label="Следващ отзив">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+      </button>
+    </div>
   </div>
 </section>
 
@@ -132,6 +141,25 @@ const testimonials = [
     color: var(--color-gray-20);
   }
 
+  /* Carousel nav arrows — mobile only */
+  .testimonials__nav {
+    display: none;
+    gap: 1em;
+    justify-content: center;
+  }
+
+  .testimonials__arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6875em; /* 43px */
+    height: 2.6875em;
+    background: var(--color-gold);
+    color: var(--color-gray-100);
+    border: none;
+    cursor: pointer;
+  }
+
   @media (max-width: 991px) {
     .testimonials__grid {
       grid-template-columns: 1fr;
@@ -139,4 +167,55 @@ const testimonials = [
       margin-inline: auto;
     }
   }
+
+  /* Mobile design: horizontal swipe carousel with prev/next arrows */
+  @media (max-width: 767px) {
+    .testimonials__grid {
+      display: flex;
+      max-width: none;
+      margin-inline: 0;
+      gap: 1em;
+      overflow-x: auto;
+      scrollbar-width: none;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+    }
+
+    .testimonials__grid::-webkit-scrollbar {
+      display: none;
+    }
+
+    .testimonial {
+      flex: 0 0 76vw;
+      max-width: 18em;
+      scroll-snap-align: start;
+    }
+
+    .testimonials__nav {
+      display: flex;
+    }
+
+    .testimonials__title {
+      font-size: 1.875em; /* ~30px */
+    }
+  }
 </style>
+
+<script>
+  const grid = document.querySelector(".testimonials__grid") as HTMLElement | null;
+  const arrows = document.querySelectorAll<HTMLButtonElement>(".testimonials__arrow");
+
+  if (grid) {
+    const step = () => {
+      const card = grid.querySelector(".testimonial") as HTMLElement | null;
+      const gap = parseFloat(getComputedStyle(grid).columnGap) || 0;
+      return card ? card.offsetWidth + gap : grid.clientWidth;
+    };
+    arrows.forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const dir = btn.dataset.dir === "prev" ? -1 : 1;
+        grid.scrollBy({ left: dir * step(), behavior: "smooth" });
+      }),
+    );
+  }
+</script>

@@ -135,19 +135,35 @@ const links = [
     text-align: right;
   }
 
+  /* Mobile design: vertical links, stacked contact (icon above text), centered legal */
   @media (max-width: 767px) {
     .footer__links {
+      flex-direction: column;
+      align-items: center;
       gap: 1.25em;
+    }
+
+    .footer__contact {
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5em;
+    }
+
+    .footer__contact-item {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5em;
+      text-align: center;
     }
 
     .footer__copyright-inner {
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
       gap: 0.5em;
     }
 
     .footer__company {
-      text-align: left;
+      text-align: center;
     }
   }
 </style>
