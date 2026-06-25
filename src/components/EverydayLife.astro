@@ -3,13 +3,27 @@ const items = [
   {
     title: "Директна комуникация",
     text: "Разговори с купувачи, продавачи и партньори на пазара.",
-    active: true,
   },
-  { title: "Работа на терен" },
-  { title: "Професионална подготовка" },
-  { title: "Следене на пазара" },
-  { title: "Реални преговори" },
-  { title: "Екипна култура" },
+  {
+    title: "Работа на терен",
+    text: "Срещи на живо, организиране на огледи и презентиране на имоти.",
+  },
+  {
+    title: "Професионална подготовка",
+    text: "Изготвяне на оферти и комуникация с клиенти.",
+  },
+  {
+    title: "Следене на пазара",
+    text: "Проследяване на възможностите и цените в конкретни райони.",
+  },
+  {
+    title: "Реални преговори",
+    text: "Ситуации и казуси, в които се учиш в движение и затваряш сделки.",
+  },
+  {
+    title: "Екипна култура",
+    text: "Работа с ментора ти, за да водиш всеки процес с предвидим резултат и силен гръб зад себе си.",
+  },
 ];
 ---
 
@@ -24,11 +38,17 @@ const items = [
     </div>
 
     <ul class="everyday__list">
-      {items.map((item) => (
-        <li class={`everyday__item${item.active ? " is-active" : ""}`}>
-          <h3 class="everyday__item-title">{item.title}</h3>
-          {item.text && <p class="everyday__item-text">{item.text}</p>}
-          {item.active && <span class="everyday__item-rule"></span>}
+      {items.map((item, i) => (
+        <li class={`everyday__item${i === 0 ? " is-active" : ""}`}>
+          <button class="everyday__item-head" type="button" aria-expanded={i === 0 ? "true" : "false"}>
+            <h3 class="everyday__item-title">{item.title}</h3>
+          </button>
+          <div class="everyday__item-reveal">
+            <div class="everyday__item-clip">
+              <p class="everyday__item-text">{item.text}</p>
+              <span class="everyday__item-rule"></span>
+            </div>
+          </div>
         </li>
       ))}
     </ul>
@@ -81,13 +101,22 @@ const items = [
   .everyday__item {
     display: flex;
     flex-direction: column;
-    gap: 0.75em; /* 12px */
     padding-bottom: 1.5em; /* 24px */
     border-bottom: 1px solid #c4c5c7;
   }
 
   .everyday__item + .everyday__item {
     padding-top: 1.5em;
+  }
+
+  .everyday__item-head {
+    display: block;
+    width: 100%;
+    padding: 0;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
   }
 
   .everyday__item-title {
@@ -97,21 +126,76 @@ const items = [
     line-height: 1.2;
     text-transform: uppercase;
     color: var(--color-gray-100);
+    transition: color 0.3s ease;
+  }
+
+  .everyday__item.is-active .everyday__item-title {
+    color: var(--color-gold-deep);
+  }
+
+  /* Collapsible body — height animates so items open/close smoothly */
+  .everyday__item-reveal {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .everyday__item.is-active .everyday__item-reveal {
+    grid-template-rows: 1fr;
+  }
+
+  .everyday__item-clip {
+    overflow: hidden;
+    min-height: 0;
   }
 
   .everyday__item-text {
+    padding-top: 0.75em; /* 12px below the heading; clipped when collapsed */
     font-family: var(--font-body);
     font-size: 1.25em; /* 20px */
     font-weight: 400;
     line-height: 1.4;
     color: var(--color-gray-80);
+    opacity: 0;
+    transition: opacity 0.4s ease;
   }
 
+  .everyday__item.is-active .everyday__item-text {
+    opacity: 1;
+  }
+
+  /* Gold line acts as the auto-advance timer: it fills, then the next item opens */
   .everyday__item-rule {
     display: block;
-    width: 11.6875em; /* 187px */
+    width: 0;
     height: 3px;
+    margin-top: 1.5em; /* 24px below the text */
     background: var(--color-gold);
+  }
+
+  @keyframes everyday-fill {
+    from { width: 0; }
+    to { width: 11.6875em; } /* 187px */
+  }
+
+  .everyday__item.is-active .everyday__item-rule {
+    animation: everyday-fill 6s linear forwards;
+  }
+
+  /* Pause the timer while the reader hovers the list */
+  .everyday__list:hover .everyday__item.is-active .everyday__item-rule {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .everyday__item-reveal,
+    .everyday__item-text {
+      transition: none;
+    }
+    .everyday__item.is-active .everyday__item-rule {
+      animation: none;
+      width: 11.6875em; /* static line; no auto-advance */
+    }
   }
 
   .everyday__media {
@@ -164,3 +248,40 @@ const items = [
     }
   }
 </style>
+
+<script>
+  const list = document.querySelector(".everyday__list");
+  if (list) {
+    const items = Array.from(list.querySelectorAll(".everyday__item"));
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let current = 0;
+
+    const setActive = (index: number) => {
+      current = index;
+      items.forEach((it, i) => {
+        const on = i === index;
+        it.classList.toggle("is-active", on);
+        it.querySelector(".everyday__item-head")?.setAttribute("aria-expanded", String(on));
+      });
+      if (!reduce) {
+        // restart the gold-line fill animation on the newly active item
+        const rule = items[index].querySelector(".everyday__item-rule") as HTMLElement | null;
+        if (rule) {
+          rule.style.animation = "none";
+          void rule.offsetWidth; // force reflow
+          rule.style.animation = "";
+        }
+      }
+    };
+
+    items.forEach((it, i) => {
+      it.querySelector(".everyday__item-head")?.addEventListener("click", () => setActive(i));
+      // When the line finishes filling, advance to the next item (looping).
+      it.querySelector(".everyday__item-rule")?.addEventListener("animationend", () => {
+        if (i === current) setActive((current + 1) % items.length);
+      });
+    });
+
+    setActive(0);
+  }
+</script>
