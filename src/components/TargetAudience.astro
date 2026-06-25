@@ -152,8 +152,12 @@ const [card1, card2, card3, card4] = cards;
     color: var(--color-gray-100);
   }
 
-  .ta__card--accent .ta__card-title {
-    color: var(--color-gold-deep);
+  /* Title turns gold only on hover / keyboard focus (hover-capable devices) */
+  @media (hover: hover) {
+    .ta__card:hover .ta__card-title,
+    .ta__card:focus-within .ta__card-title {
+      color: var(--color-gold-deep);
+    }
   }
 
   .ta__card-text {
@@ -193,10 +197,6 @@ const [card1, card2, card3, card4] = cards;
     /* Mobile design: every card shows its description, card 1 is the gold one */
     .ta__card-text {
       display: block;
-    }
-
-    .ta__card--accent .ta__card-title {
-      color: var(--color-gray-100);
     }
 
     .ta__card--m-accent .ta__card-title {
