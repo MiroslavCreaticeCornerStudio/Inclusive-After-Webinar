@@ -119,10 +119,17 @@ const cards = [
     width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
+    cursor: grab;
   }
 
   .expect__scroll::-webkit-scrollbar {
     display: none;
+  }
+
+  .expect__scroll.is-dragging {
+    cursor: grabbing;
+    user-select: none;
+    scroll-snap-type: none;
   }
 
   .expect__track {
@@ -190,11 +197,11 @@ const cards = [
     background-color: var(--color-gold);
   }
 
-  /* Carousel nav arrows — mobile only */
+  /* Slider nav arrows */
   .expect__nav {
-    display: none;
+    display: flex;
     gap: 1em;
-    justify-content: center;
+    justify-content: flex-end;
   }
 
   .expect__arrow {
@@ -254,7 +261,7 @@ const cards = [
     }
 
     .expect__nav {
-      display: flex;
+      justify-content: center;
     }
   }
 </style>
@@ -289,5 +296,34 @@ const cards = [
         scroller.scrollBy({ left: dir * step(), behavior: "smooth" });
       }),
     );
+
+    // Click-and-drag to scroll (mouse only — touch keeps native swipe).
+    let down = false;
+    let startX = 0;
+    let startScroll = 0;
+    scroller.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "mouse") return;
+      down = true;
+      startX = e.clientX;
+      startScroll = scroller.scrollLeft;
+      scroller.classList.add("is-dragging");
+      try {
+        scroller.setPointerCapture(e.pointerId);
+      } catch {}
+    });
+    scroller.addEventListener("pointermove", (e) => {
+      if (!down) return;
+      scroller.scrollLeft = startScroll - (e.clientX - startX);
+    });
+    const endDrag = (e: PointerEvent) => {
+      if (!down) return;
+      down = false;
+      scroller.classList.remove("is-dragging");
+      try {
+        scroller.releasePointerCapture(e.pointerId);
+      } catch {}
+    };
+    scroller.addEventListener("pointerup", endDrag);
+    scroller.addEventListener("pointercancel", endDrag);
   }
 </script>
