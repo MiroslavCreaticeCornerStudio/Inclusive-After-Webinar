@@ -19,16 +19,17 @@ const galleryImages = [
     </p>
   </div>
 
-  <div class="hero__gallery" aria-hidden="false">
+  <div class="hero__gallery">
+    {/* Images are duplicated (set + identical copy) so the marquee loops seamlessly. */}
     <ul class="hero__track">
-      {galleryImages.map((img, i) => (
-        <li class={`hero__img ${img.cls}`}>
+      {[...galleryImages, ...galleryImages].map((img, i) => (
+        <li class={`hero__img ${img.cls}`} aria-hidden={i >= galleryImages.length ? "true" : undefined}>
           <img
             src={img.src}
-            alt={`Екипът на INclusive — снимка ${i + 1}`}
+            alt={i < galleryImages.length ? `Екипът на INclusive — снимка ${i + 1}` : ""}
             width="461"
             height="290"
-            loading={i === 2 ? "eager" : "lazy"}
+            loading={i < galleryImages.length ? "eager" : "lazy"}
             decoding="async"
           />
         </li>
@@ -92,15 +93,13 @@ const galleryImages = [
   .hero__track {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 1.5em; /* 24px */
     width: max-content;
-    margin-inline: auto;
-    min-width: 100%;
+    will-change: transform;
   }
 
   .hero__img {
     flex-shrink: 0;
+    margin-right: 1.5em; /* 24px — per-item gap so the -50% marquee loop is seamless */
     border-radius: 0.75em; /* 12px */
     overflow: hidden;
   }

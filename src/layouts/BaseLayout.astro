@@ -146,7 +146,28 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? "https://inclusive.bg");
             .timeline({ defaults: { ease: ease, duration: 1.05 } })
             .from(".hero__title", { y: 20, autoAlpha: 0, scale: 0.99 })
             .from(".hero__subtitle", { y: 18, autoAlpha: 0 }, "-=0.75")
-            .from(".hero__img", { y: 22, autoAlpha: 0, stagger: 0.1, duration: 0.9 }, "-=0.65");
+            .from(".hero__gallery", { autoAlpha: 0, duration: 0.9 }, "-=0.6");
+
+          // Hero gallery — seamless infinite marquee (images are duplicated in the markup,
+          // so xPercent -50 advances exactly one set). Eases to a slow drift on hover.
+          var heroTrack = document.querySelector(".hero__track");
+          if (heroTrack) {
+            var heroMarquee = gsap.to(heroTrack, {
+              xPercent: -50,
+              duration: 30,
+              ease: "none",
+              repeat: -1,
+            });
+            var heroGallery = document.querySelector(".hero__gallery");
+            if (heroGallery) {
+              heroGallery.addEventListener("mouseenter", function () {
+                gsap.to(heroMarquee, { timeScale: 0.25, duration: 0.5, overwrite: true });
+              });
+              heroGallery.addEventListener("mouseleave", function () {
+                gsap.to(heroMarquee, { timeScale: 1, duration: 0.5, overwrite: true });
+              });
+            }
+          }
 
           // Section headings / intros — gently fade up as they enter (once)
           gsap.utils
