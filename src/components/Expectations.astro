@@ -1,4 +1,6 @@
 ---
+import { withBase } from "../lib/withBase";
+
 const cards = [
   {
     icon: "/assets/images/icon-1.svg",
@@ -52,7 +54,7 @@ const cards = [
         {cards.map((card) => (
           <li class="expect__card">
             <div class="expect__card-top">
-              <img class="expect__icon" src={card.icon} alt="" width="40" height="40" aria-hidden="true" />
+              <img class="expect__icon" src={withBase(card.icon)} alt="" width="40" height="40" aria-hidden="true" />
               <h3 class="expect__card-title">{card.title}</h3>
             </div>
             <span class="gold-rule"></span>

@@ -1,4 +1,6 @@
 ---
+import { withBase } from "../lib/withBase";
+
 const testimonials = [
   {
     avatar: "/assets/images/avatar-1.jpg",
@@ -34,7 +36,7 @@ const testimonials = [
       {testimonials.map((t) => (
         <li class="testimonial">
           <div class="testimonial__person">
-            <img class="testimonial__avatar" src={t.avatar} alt={t.name} width="80" height="80" loading="lazy" />
+            <img class="testimonial__avatar" src={withBase(t.avatar)} alt={t.name} width="80" height="80" loading="lazy" />
             <div class="testimonial__meta">
               <p class="testimonial__name">{t.name}</p>
               <p class="testimonial__role">{t.role}</p>

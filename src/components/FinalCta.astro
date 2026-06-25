@@ -1,4 +1,6 @@
 ---
+import { withBase } from "../lib/withBase";
+
 const beliefs = [
   "Най-силните резултати идват, когато има доверие в екипа",
   "Човек расте най-много в правилната среда",
@@ -8,7 +10,7 @@ const beliefs = [
 ];
 ---
 
-<section class="cta" id="kandidatstvay">
+<section class="cta" id="kandidatstvay" style={`--cta-bg: url("${withBase("/assets/images/cta-bg.jpg")}")`}>
   <div class="cta__panel container">
     <div class="cta__text">
       <div class="cta__heading">
@@ -28,7 +30,7 @@ const beliefs = [
       </div>
     </div>
 
-    <form class="cta__form" method="post" action="/api/apply" novalidate>
+    <form class="cta__form" method="post" action={withBase("/api/apply")} novalidate>
       <div class="cta__field">
         <label class="cta__label" for="cta-name">Имена:</label>
         <input class="cta__input" id="cta-name" name="name" type="text" placeholder="Име Фамилия" autocomplete="name" required aria-describedby="cta-name-error" />
@@ -65,7 +67,7 @@ const beliefs = [
     width: 100%;
     padding-block: 5.25em; /* 84px */
     background-image: linear-gradient(rgba(33, 35, 43, 0.9), rgba(33, 35, 43, 0.9)),
-      url("/assets/images/cta-bg.jpg");
+      var(--cta-bg);
     background-size: cover;
     background-position: center;
   }
@@ -263,9 +265,17 @@ const beliefs = [
       max-width: none;
     }
   }
+
+  @media (max-width: 767px) {
+    .cta__title {
+      font-size: 2.75em; /* 44px */
+    }
+  }
 </style>
 
 <script>
+  import { withBase } from "../lib/withBase";
+
   const form = document.querySelector(".cta__form") as HTMLFormElement | null;
   const status = document.querySelector(".cta__status") as HTMLElement | null;
   const submit = form?.querySelector(".cta__submit") as HTMLButtonElement | null;
@@ -363,7 +373,7 @@ const beliefs = [
       setStatus("Изпращане…", "");
 
       try {
-        const res = await fetch("/api/apply", {
+        const res = await fetch(withBase("/api/apply"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
@@ -373,7 +383,7 @@ const beliefs = [
           form.reset();
           fields.forEach((n) => showError(n, false));
           setStatus("Пренасочване…", "ok");
-          window.location.assign("/thank-you");
+          window.location.assign(withBase("/thank-you"));
           return;
         }
         setStatus(result.error || "Възникна грешка при изпращането. Моля, опитай отново.", "error");

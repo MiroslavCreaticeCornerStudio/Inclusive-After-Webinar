@@ -1,4 +1,6 @@
 ---
+import { withBase } from "../lib/withBase";
+
 const links = [
   { label: "За кого е", href: "#za-kogo-e" },
   { label: "Какво те очаква", href: "#kakvo-te-ochakva" },
@@ -12,7 +14,7 @@ const links = [
   <div class="navbar__inner container">
     <a class="navbar__logo" href="#top" aria-label="INclusive — недвижими имоти">
       <img
-        src="/assets/images/logo.png"
+        src={withBase("/assets/images/logo.png")}
         alt="INclusive недвижими имоти"
         width="138"
         height="58"

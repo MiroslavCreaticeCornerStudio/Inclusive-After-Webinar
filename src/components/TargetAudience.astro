@@ -2,6 +2,8 @@
 // Section: "За кого е" — who we're looking for.
 // Each card has a description; on desktop only the accent card shows it (others reveal the
 // same copy on mobile, matching the dedicated mobile design).
+import { withBase } from "../lib/withBase";
+
 const cards = [
   {
     title: "Притежаваш характер и отговорност",
@@ -39,7 +41,7 @@ const [card1, card2, card3, card4] = cards;
     <div class="ta__grid">
       <!-- Row 1 -->
       <div class="ta__media">
-        <img src="/assets/images/target-1.jpg" alt="Екип на INclusive в офиса" width="399" height="301" loading="lazy" />
+        <img src={withBase("/assets/images/target-1.jpg")} alt="Екип на INclusive в офиса" width="399" height="301" loading="lazy" />
       </div>
       {[card1, card2].map((c) => (
         <article class={`ta__card${c.accent ? " ta__card--accent" : ""}${c.mobileAccent ? " ta__card--m-accent" : ""}`} tabindex="0">
@@ -62,7 +64,7 @@ const [card1, card2, card3, card4] = cards;
         </article>
       ))}
       <div class="ta__media">
-        <img src="/assets/images/target-2.jpg" alt="Среща на брокери от INclusive" width="399" height="303" loading="lazy" />
+        <img src={withBase("/assets/images/target-2.jpg")} alt="Среща на брокери от INclusive" width="399" height="303" loading="lazy" />
       </div>
     </div>
   </div>

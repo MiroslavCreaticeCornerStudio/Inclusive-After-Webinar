@@ -1,4 +1,6 @@
 ---
+import { withBase } from "../lib/withBase";
+
 const items = [
   {
     title: "Директна комуникация",
@@ -34,7 +36,7 @@ const items = [
     </div>
 
     <div class="everyday__media">
-      <img src="/assets/images/everyday.jpg" alt="Брокер на INclusive в ежедневието си" width="608" height="683" loading="lazy" />
+      <img src={withBase("/assets/images/everyday.jpg")} alt="Брокер на INclusive в ежедневието си" width="608" height="683" loading="lazy" />
     </div>
 
     <ul class="everyday__list">

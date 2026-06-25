@@ -9,14 +9,17 @@ import Testimonials from "../components/Testimonials.astro";
 import WhyChooseUs from "../components/WhyChooseUs.astro";
 import FinalCta from "../components/FinalCta.astro";
 import Footer from "../components/Footer.astro";
+import { withBase } from "../lib/withBase";
+
+const site = Astro.site ?? new URL("https://webinar.inclusive.bg");
 
 const orgSchema = {
   "@context": "https://schema.org",
   "@type": "RealEstateAgent",
   name: "INclusive",
   legalName: "Инклузив България АД",
-  url: Astro.site?.href ?? "https://inclusive.bg",
-  logo: new URL("/assets/images/logo.png", Astro.site ?? "https://inclusive.bg").href,
+  url: new URL(withBase("/"), site).href,
+  logo: new URL(withBase("/assets/images/logo.png"), site).href,
   telephone: "0700 30 101",
   address: {
     "@type": "PostalAddress",

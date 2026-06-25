@@ -14,7 +14,12 @@ import vercel from '@astrojs/vercel';
 // Server secrets are read at runtime via `getSecret()` from `astro:env/server`
 // (in src/lib/zoom.ts, src/lib/crm.ts, src/pages/api/apply.ts) — no schema needed.
 export default defineConfig({
-  site: 'https://inclusive.bg',
+  // Served as a subpath of the webinar host: https://webinar.inclusive.bg/careers
+  // `base` makes every emitted route + bundled asset live under /careers so they
+  // don't collide with the other project sitting at the domain root. The main
+  // project rewrites /careers/* to this deployment.
+  site: 'https://webinar.inclusive.bg',
+  base: '/careers',
   adapter: vercel(),
   integrations: [sitemap()],
 });

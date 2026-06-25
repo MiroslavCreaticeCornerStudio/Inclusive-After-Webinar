@@ -1,4 +1,6 @@
 ---
+import { withBase } from "../lib/withBase";
+
 const galleryImages = [
   "/assets/images/hero-1.jpg",
   "/assets/images/hero-2.jpg",
@@ -25,7 +27,7 @@ const galleryImages = [
       {[...galleryImages, ...galleryImages].map((src, i) => (
         <li class="hero__img" aria-hidden={i >= galleryImages.length ? "true" : undefined}>
           <img
-            src={src}
+            src={withBase(src)}
             alt={i < galleryImages.length ? `Екипът на INclusive — снимка ${i + 1}` : ""}
             width="384"
             height="256"

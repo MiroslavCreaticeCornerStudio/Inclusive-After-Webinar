@@ -1,4 +1,6 @@
 ---
+import { withBase } from "../lib/withBase";
+
 const links = [
   { label: "За кого е", href: "#za-kogo-e" },
   { label: "Какво те очаква", href: "#kakvo-te-ochakva" },
@@ -11,7 +13,7 @@ const links = [
 <footer class="footer">
   <div class="footer__frame container">
     <a class="footer__logo" href="#top" aria-label="INclusive — недвижими имоти">
-      <img src="/assets/images/logo.png" alt="INclusive недвижими имоти" width="143" height="60" decoding="async" />
+      <img src={withBase("/assets/images/logo.png")} alt="INclusive недвижими имоти" width="143" height="60" decoding="async" />
     </a>
 
     <nav class="footer__links" aria-label="Навигация във футъра">
@@ -37,7 +39,7 @@ const links = [
 
   <div class="footer__copyright">
     <div class="footer__copyright-inner container">
-      <a class="footer__privacy" href="#">Защита на личните данни</a>
+      <a class="footer__privacy" href={withBase("/zashtita-na-lichnite-danni")}>Защита на личните данни</a>
       <span class="footer__company">“Инклузив България” АД, 2026 година</span>
     </div>
   </div>

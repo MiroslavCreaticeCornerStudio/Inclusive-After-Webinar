@@ -1,0 +1,255 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Footer from "../components/Footer.astro";
+import { withBase } from "../lib/withBase";
+
+// Content adapted from the official policy of „Инклузив България“ АД:
+// https://inclusive.bg/защита-на-личните-данни/
+const sections: { title: string; paras?: string[]; list?: string[] }[] = [
+  {
+    title: "Администратор на данните",
+    paras: [
+      "„Инклузив България“ АД управлява този уебсайт и обработва Вашите лични данни като администратор по смисъла на Регламент (ЕС) 2016/679 (GDPR) и Закона за защита на личните данни.",
+    ],
+    list: [
+      "Адрес: гр. София, бул. „Тодор Александров“ №71",
+      "Телефон: 0700 30 101",
+      "Уебсайт: https://inclusive.bg/",
+    ],
+  },
+  {
+    title: "Категории лични данни",
+    paras: [
+      "В зависимост от взаимоотношенията ни с Вас, Дружеството може да обработва: имена, единен граждански номер, дата и място на раждане, номер на лична карта, адрес, телефон, електронен адрес, банкова сметка, доход, снимки, семейно положение и коментари. За определени цели могат да се обработват и данни от автобиография (CV) и виза L-1, както и специални категории данни относно здравословното състояние на служители.",
+    ],
+  },
+  {
+    title: "Субекти на данните",
+    paras: [
+      "Клиенти, персонал (настоящи и бивши служители), кандидати за работа, заявители и партньори.",
+    ],
+  },
+  {
+    title: "Цели на обработката",
+    list: [
+      "Предоставяне на консултантски услуги в сферата на недвижимите имоти.",
+      "Изпълнение на трудовото законодателство и сключване на договори.",
+      "Изпълнение на законови задължения (счетоводство, данъци, мерки срещу изпиране на пари).",
+      "Предоставяне на маркетингова информация.",
+      "Поддръжка и сигурност на уебсайта.",
+    ],
+  },
+  {
+    title: "Правни основания",
+    list: [
+      "Съгласие на субекта на данните.",
+      "Необходимост за изпълнение на договор.",
+      "Спазване на законово задължение.",
+      "Легитимни интереси на администратора.",
+    ],
+  },
+  {
+    title: "Получатели на данните",
+    paras: [
+      "Държавни органи; търговски дружества (счетоводно обслужване, IT поддръжка); партньори в консултантската дейност.",
+    ],
+  },
+  {
+    title: "Срокове за съхранение",
+    list: [
+      "Клиенти — 5 години от приключване на договора.",
+      "Кандидати за работа — 1 година.",
+      "Служители — съгласно трудовото законодателство.",
+      "Данни, обработвани на основание съгласие — 1 година.",
+      "Ведомости за заплати — 50 години.",
+      "Счетоводни регистри — 10 години.",
+    ],
+  },
+  {
+    title: "Права на субектите на данните",
+    paras: [
+      "Имате право на достъп, коригиране, изтриване, ограничаване на обработката, преносимост на данните и възражение срещу обработката. Исканията се подават чрез съответните формуляри или на място в офиса на Дружеството.",
+    ],
+  },
+  {
+    title: "Оттегляне на съгласие",
+    paras: [
+      "Когато обработката се основава на Вашето съгласие, можете да го оттеглите по всяко време — чрез формуляр или в офиса на Дружеството. Оттеглянето не засяга законосъобразността на обработката, извършена преди оттеглянето.",
+    ],
+  },
+  {
+    title: "Жалба до надзорния орган",
+    paras: [
+      "Имате право да подадете жалба до Комисията за защита на личните данни: гр. София, бул. „Проф. Цветан Лазаров“ №2, www.cpdp.bg.",
+    ],
+  },
+  {
+    title: "Мерки за сигурност",
+    paras: [
+      "Документите на хартиен носител се съхраняват в заключени шкафове; помещенията са обезопасени с алармени системи; достъпът до информационните системи се осъществява чрез уникални акаунти и пароли; персоналът преминава обучение за защита на конфиденциалността.",
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="Защита на личните данни — INclusive"
+  description="Политика за защита на личните данни на „Инклузив България“ АД — администратор, цели на обработката, правни основания, срокове и права на субектите на данните."
+>
+  <header class="legal-top">
+    <a href={withBase("/")} class="legal-top__logo" aria-label="INclusive — начало">
+      <img src={withBase("/assets/images/logo.png")} alt="INclusive недвижими имоти" width="143" height="60" decoding="async" />
+    </a>
+    <a href={withBase("/")} class="legal-top__back">← Към сайта</a>
+  </header>
+
+  <main id="main" class="legal">
+    <div class="container legal__inner">
+      <h1 class="legal__title">Защита на личните данни</h1>
+      <p class="legal__lead">
+        „Инклузив България“ АД зачита неприкосновеността на личните Ви данни и ги обработва
+        в съответствие с Регламент (ЕС) 2016/679 (GDPR) и приложимото българско
+        законодателство. По-долу е обобщена информацията за това какви данни обработваме,
+        с каква цел и какви права имате.
+      </p>
+
+      {
+        sections.map((s) => (
+          <section class="legal__section">
+            <h2 class="legal__h2">{s.title}</h2>
+            {s.paras?.map((p) => <p class="legal__p">{p}</p>)}
+            {s.list && (
+              <ul class="legal__list">
+                {s.list.map((li) => (
+                  <li>{li}</li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ))
+      }
+
+      <p class="legal__note">
+        Това е обобщение на политиката за защита на личните данни на „Инклузив България“ АД.
+        Пълният текст е достъпен на
+        <a href="https://inclusive.bg/защита-на-личните-данни/" target="_blank" rel="noopener noreferrer">
+          inclusive.bg</a>.
+      </p>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .legal-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5em;
+    padding: 1.25em var(--container-padding);
+    background-color: var(--color-bg-dark);
+    border-bottom: 1px solid var(--color-gold);
+  }
+  .legal-top__logo {
+    display: block;
+    flex-shrink: 0;
+  }
+  .legal-top__logo img {
+    width: 8.9375em; /* 143px */
+    height: auto;
+  }
+  .legal-top__back {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 1.125em; /* 18px */
+    color: var(--color-gray-10);
+    white-space: nowrap;
+  }
+  .legal-top__back:hover {
+    color: var(--color-gold);
+  }
+
+  .legal {
+    background-color: var(--color-bg-dark);
+    padding-block: 4em 6em;
+  }
+  .legal__inner {
+    max-width: 50em; /* readable line length */
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+  }
+  .legal__title {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 3em; /* 48px */
+    line-height: 1.2;
+    color: var(--color-gold);
+    text-transform: uppercase;
+  }
+  .legal__lead {
+    font-family: var(--font-body);
+    font-weight: 300;
+    font-size: 1.25em; /* 20px */
+    line-height: 1.4;
+    color: var(--color-gray-10);
+  }
+  .legal__section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+  }
+  .legal__h2 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 1.5em; /* 24px */
+    line-height: 1.25;
+    color: var(--color-gray-10);
+    text-transform: uppercase;
+  }
+  .legal__p {
+    font-family: var(--font-body);
+    font-weight: 300;
+    font-size: 1.0625em; /* 17px */
+    line-height: 1.5;
+    color: var(--color-gray-20);
+  }
+  .legal__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    padding-left: 1.25em;
+    list-style: disc;
+  }
+  .legal__list li {
+    font-family: var(--font-body);
+    font-weight: 300;
+    font-size: 1.0625em; /* 17px */
+    line-height: 1.5;
+    color: var(--color-gray-20);
+  }
+  .legal__note {
+    margin-top: 1em;
+    padding-top: 1.5em;
+    border-top: 1px solid rgba(245, 244, 236, 0.15);
+    font-family: var(--font-body);
+    font-weight: 300;
+    font-size: 0.9375em; /* 15px */
+    line-height: 1.5;
+    color: var(--color-gray-40);
+  }
+  .legal__note a {
+    color: var(--color-gold);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 767px) {
+    .legal__title {
+      font-size: 2.25em;
+    }
+    .legal__lead {
+      font-size: 1.125em;
+    }
+  }
+</style>

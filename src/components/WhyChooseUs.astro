@@ -1,4 +1,6 @@
 ---
+import { withBase } from "../lib/withBase";
+
 const leftCards = [
   {
     icon: "/assets/images/why-1.svg",
@@ -44,7 +46,7 @@ const rightCards = [
         {leftCards.map((card) => (
           <article class="why-card">
             <span class="why-card__icon">
-              <img src={card.icon} alt="" width="42" height="42" aria-hidden="true" />
+              <img src={withBase(card.icon)} alt="" width="42" height="42" aria-hidden="true" />
             </span>
             <div class="why-card__body">
               <h3 class="why-card__title">{card.title}</h3>
@@ -56,14 +58,14 @@ const rightCards = [
       </div>
 
       <div class="why__media">
-        <img src="/assets/images/why-building.jpg" alt="Сграда на INclusive" width="480" height="549" loading="lazy" />
+        <img src={withBase("/assets/images/why-building.jpg")} alt="Сграда на INclusive" width="480" height="549" loading="lazy" />
       </div>
 
       <div class="why__col">
         {rightCards.map((card) => (
           <article class="why-card">
             <span class="why-card__icon">
-              <img src={card.icon} alt="" width="42" height="42" aria-hidden="true" />
+              <img src={withBase(card.icon)} alt="" width="42" height="42" aria-hidden="true" />
             </span>
             <div class="why-card__body">
               <h3 class="why-card__title">{card.title}</h3>

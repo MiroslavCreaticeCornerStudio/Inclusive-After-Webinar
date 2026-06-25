@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://inclusive.bg/sitemap-index.xml
+Sitemap: https://webinar.inclusive.bg/careers/sitemap-index.xml
