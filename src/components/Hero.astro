@@ -151,6 +151,12 @@ const galleryImages = [
     .hero__title {
       font-size: 2.25em; /* ~36px */
     }
+
+    /* No edge fades on mobile — images show fully */
+    .hero__gallery::before,
+    .hero__gallery::after {
+      display: none;
+    }
   }
 
   @media (max-width: 479px) {
