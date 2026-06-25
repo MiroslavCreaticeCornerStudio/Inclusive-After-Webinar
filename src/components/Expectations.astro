@@ -231,20 +231,22 @@ const cards = [
       width: 100%;
     }
 
+    /* Mobile: stacked cards instead of a slider */
     .expect__scroll {
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
+      overflow: visible;
+      cursor: default;
     }
 
     .expect__track {
+      flex-direction: column;
+      width: 100%;
       gap: 1em;
     }
 
     .expect__card {
-      width: 84vw;
-      max-width: 20em;
-      border-left: 1px solid var(--color-gray-60);
-      scroll-snap-align: start;
+      width: 100%;
+      border: 1px solid var(--color-gray-60);
+      padding: 1.5em; /* 24px */
     }
 
     .expect__card-title {
@@ -255,13 +257,10 @@ const cards = [
       font-size: 1.125em; /* ~18px */
     }
 
-    .expect__progress {
-      align-self: stretch;
-      width: 100%;
-    }
-
+    /* No slider controls when the cards are stacked */
+    .expect__progress,
     .expect__nav {
-      justify-content: center;
+      display: none;
     }
   }
 </style>
