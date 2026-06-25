@@ -213,7 +213,7 @@ const [card1, card2, card3, card4] = cards;
       min-height: auto;
     }
 
-    /* Mobile design: every card shows its description, card 1 is the gold one */
+    /* Mobile: every card shows its description; titles stay dark */
     .ta__card-reveal {
       grid-template-rows: 1fr;
     }
@@ -221,10 +221,6 @@ const [card1, card2, card3, card4] = cards;
     .ta__card-text {
       opacity: 1;
       transform: none;
-    }
-
-    .ta__card--m-accent .ta__card-title {
-      color: var(--color-gold-deep);
     }
 
     .ta__title {
