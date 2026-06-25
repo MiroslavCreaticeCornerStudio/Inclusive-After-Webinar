@@ -1,5 +1,5 @@
-// Forward the registration to the custom CRM (skyguru).
-// Best-effort: never throws, never blocks the Brevo/Zoom lead capture.
+// Forward the registration to the custom CRM (skyguru) — the only lead sink.
+// Returns whether the CRM accepted the lead; never throws (caller maps false → error).
 // Endpoint is overridable via the CRM_ENDPOINT env var; optional bearer auth via
 // SKYGURU_API_KEY (sent only if set). Secrets via astro:env getSecret.
 import { getSecret } from "astro:env/server";

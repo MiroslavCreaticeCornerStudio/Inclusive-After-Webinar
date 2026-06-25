@@ -2,11 +2,7 @@
 export const prerender = false;
 
 import type { APIRoute } from "astro";
-// Adapter-agnostic runtime secrets (reads `.env` in dev, Vercel env vars in prod).
-import { getSecret } from "astro:env/server";
 import { sendToCrm } from "../../lib/crm";
-
-const BREVO_CONTACTS_ENDPOINT = "https://api.brevo.com/v3/contacts";
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -15,28 +11,7 @@ function json(data: unknown, status = 200) {
   });
 }
 
-// Normalize a (likely Bulgarian) phone number to E.164 for Brevo's SMS attribute.
-function normalizePhone(raw: string): string | null {
-  const p = (raw || "").trim().replace(/[^\d+]/g, "");
-  if (!p) return null;
-  if (p.startsWith("+")) return p;
-  if (p.startsWith("00")) return "+" + p.slice(2);
-  if (p.startsWith("359")) return "+" + p;
-  if (p.startsWith("0")) return "+359" + p.slice(1);
-  return "+359" + p;
-}
-
 export const POST: APIRoute = async ({ request }) => {
-  const apiKey = getSecret("BREVO_API_KEY")?.trim();
-  const listId = Number(getSecret("BREVO_LIST_ID") ?? 9);
-
-  if (!apiKey) {
-    return json(
-      { ok: false, error: "Формата все още не е конфигурирана (липсва BREVO_API_KEY)." },
-      500,
-    );
-  }
-
   // Accept JSON or classic form-encoded submissions.
   let body: Record<string, any> = {};
   try {
@@ -64,31 +39,7 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ ok: false, error: "Моля, дайте съгласие за обработка на данните." }, 400);
   }
 
-  const sms = normalizePhone(phone);
-  const nameAttr: Record<string, string> = name ? { FIRSTNAME: name } : {};
-
-  // Facebook offline-conversion tracking → Brevo contact attributes.
-  // Mapped to the attributes that exist in this Brevo account (verified):
-  // fb_click_time → AD_TIMESTAMP, landing_url → LANDING_PAGE.
-  const TRACKING_MAP: Record<string, string> = {
-    fbclid: "FBCLID",
-    utm_source: "UTM_SOURCE",
-    utm_medium: "UTM_MEDIUM",
-    utm_campaign: "UTM_CAMPAIGN",
-    utm_term: "UTM_TERM",
-    utm_content: "UTM_CONTENT",
-    fb_click_time: "AD_TIMESTAMP",
-    landing_url: "LANDING_PAGE",
-  };
-  const trackingAttributes: Record<string, string> = {};
-  for (const [key, attr] of Object.entries(TRACKING_MAP)) {
-    const v = (body as Record<string, unknown>)[key];
-    if (v !== undefined && v !== null && String(v).trim() !== "") {
-      trackingAttributes[attr] = String(v).slice(0, 250);
-    }
-  }
-
-  // Forward the full lead to the custom CRM (skyguru) — best-effort, never blocks.
+  // The CRM (skyguru) is the only destination for leads.
   const crmPayload: Record<string, unknown> = {
     name,
     email,
@@ -98,6 +49,7 @@ export const POST: APIRoute = async ({ request }) => {
     source: "inclusive.bg",
     submitted_at: new Date().toISOString(),
   };
+  // Facebook offline-conversion + UTM tracking, forwarded as-is when present.
   for (const key of [
     "fbclid",
     "utm_source",
@@ -111,57 +63,17 @@ export const POST: APIRoute = async ({ request }) => {
     const v = (body as Record<string, unknown>)[key];
     if (v !== undefined && v !== null && String(v).trim() !== "") crmPayload[key] = String(v);
   }
-  await sendToCrm(crmPayload);
 
-  const createContact = (attributes: Record<string, string>) =>
-    fetch(BREVO_CONTACTS_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "api-key": apiKey,
-        "content-type": "application/json",
-        accept: "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        attributes,
-        listIds: [listId],
-        updateEnabled: true, // upsert if the contact already exists
-      }),
-    });
-
-  const ok = (res: Response) => res.ok || res.status === 201 || res.status === 204;
-
-  try {
-    // Phone → TELEFON (text) with SMS as a backup. Richest payload first; fall back so a
-    // missing attribute in this Brevo account never costs us the lead.
-    const telAttr = phone ? { TELEFON: phone } : {};
-    const smsAttr = sms ? { SMS: sms } : {};
-    const attempts = [
-      { ...nameAttr, ...telAttr, ...smsAttr, ...trackingAttributes },
-      { ...nameAttr, ...telAttr, ...trackingAttributes },
-      { ...nameAttr, ...telAttr },
-      { ...nameAttr, ...smsAttr },
-      { ...nameAttr },
-    ];
-    let res: Response | null = null;
-    for (const attrs of attempts) {
-      res = await createContact(attrs);
-      if (ok(res)) {
-        return json({ ok: true });
-      }
-    }
-    console.error("Brevo error", res?.status, res ? await res.text() : "no response");
+  // Success now depends on the CRM accepting the lead — no silent loss.
+  const delivered = await sendToCrm(crmPayload);
+  if (!delivered) {
     return json(
       { ok: false, error: "Възникна грешка при записването. Опитайте отново." },
       502,
     );
-  } catch (e) {
-    console.error("Brevo request failed", e);
-    return json(
-      { ok: false, error: "Възникна грешка при връзката. Опитайте отново." },
-      502,
-    );
   }
+
+  return json({ ok: true });
 };
 
 // Politely reject other methods.
