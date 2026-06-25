@@ -58,9 +58,10 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? "https://inclusive.bg");
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
     />
 
-    {/* GSAP — loaded as globals for the light scroll-reveal init at the end of <body> */}
+    {/* GSAP + Lenis — globals for the smooth-scroll + scroll-reveal init at the end of <body> */}
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script is:inline src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
 
     <slot name="head" />
   </head>
@@ -111,31 +112,58 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? "https://inclusive.bg");
         gsap.registerPlugin(ScrollTrigger);
 
         gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
-          var ease = "power2.out";
+          var ease = "power3.out"; // smooth, gentle deceleration
+
+          // Lenis smooth (inertia) scrolling, driven by GSAP's ticker and synced to ScrollTrigger
+          var lenis;
+          var lenisRaf;
+          if (typeof Lenis !== "undefined") {
+            lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+            lenis.on("scroll", ScrollTrigger.update);
+            lenisRaf = function (time) {
+              lenis.raf(time * 1000);
+            };
+            gsap.ticker.add(lenisRaf);
+            gsap.ticker.lagSmoothing(0);
+
+            // Smooth in-page anchor navigation (clears the sticky navbar)
+            var nav = document.querySelector(".navbar");
+            var navOffset = nav ? -(nav.offsetHeight + 8) : 0;
+            document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+              a.addEventListener("click", function (e) {
+                var id = a.getAttribute("href");
+                if (!id || id.length < 2) return;
+                var target = document.querySelector(id);
+                if (!target) return;
+                e.preventDefault();
+                lenis.scrollTo(target, { offset: navOffset });
+              });
+            });
+          }
 
           // Hero intro on load
           gsap
-            .timeline({ defaults: { ease: ease, duration: 0.9 } })
-            .from(".hero__title", { y: 24, autoAlpha: 0 })
-            .from(".hero__subtitle", { y: 20, autoAlpha: 0 }, "-=0.6")
-            .from(".hero__img", { y: 24, autoAlpha: 0, stagger: 0.08, duration: 0.7 }, "-=0.5");
+            .timeline({ defaults: { ease: ease, duration: 1.05 } })
+            .from(".hero__title", { y: 20, autoAlpha: 0, scale: 0.99 })
+            .from(".hero__subtitle", { y: 18, autoAlpha: 0 }, "-=0.75")
+            .from(".hero__img", { y: 22, autoAlpha: 0, stagger: 0.1, duration: 0.9 }, "-=0.65");
 
-          // Section headings / intros — fade up as they enter (once)
+          // Section headings / intros — gently fade up as they enter (once)
           gsap.utils
             .toArray(
               ".ta__header, .expect__header, .everyday__head, .testimonials__header, .why__header, .cta__text, .footer__frame"
             )
             .forEach(function (el) {
               gsap.from(el, {
-                y: 28,
+                y: 22,
                 autoAlpha: 0,
-                duration: 0.9,
+                duration: 1.2,
                 ease: ease,
-                scrollTrigger: { trigger: el, start: "top 85%", once: true },
+                scrollTrigger: { trigger: el, start: "top 88%", once: true },
               });
             });
 
-          // Grouped staggers — cards / list items reveal as the group enters
+          // Grouped staggers — cards / list items ease in as the group enters
           [
             { trigger: ".ta__grid", targets: ":scope > *" },
             { trigger: ".expect__track", targets: ".expect__card" },
@@ -146,12 +174,13 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? "https://inclusive.bg");
             var t = document.querySelector(g.trigger);
             if (!t) return;
             gsap.from(t.querySelectorAll(g.targets), {
-              y: 30,
+              y: 22,
               autoAlpha: 0,
-              duration: 0.7,
+              scale: 0.985,
+              duration: 1,
               ease: ease,
-              stagger: 0.08,
-              scrollTrigger: { trigger: t, start: "top 85%", once: true },
+              stagger: { each: 0.11, ease: "power1.out" },
+              scrollTrigger: { trigger: t, start: "top 88%", once: true },
             });
           });
 
@@ -159,10 +188,11 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? "https://inclusive.bg");
           gsap.utils.toArray(".everyday__media").forEach(function (el) {
             gsap.from(el, {
               autoAlpha: 0,
-              y: 20,
-              duration: 1,
+              y: 18,
+              scale: 0.99,
+              duration: 1.3,
               ease: ease,
-              scrollTrigger: { trigger: el, start: "top 85%", once: true },
+              scrollTrigger: { trigger: el, start: "top 88%", once: true },
             });
           });
 
@@ -175,6 +205,14 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? "https://inclusive.bg");
           window.addEventListener("load", function () {
             ScrollTrigger.refresh();
           });
+
+          // Revert if the motion preference changes
+          return function () {
+            if (lenis) {
+              gsap.ticker.remove(lenisRaf);
+              lenis.destroy();
+            }
+          };
         });
       })();
     </script>
