@@ -42,7 +42,7 @@ const [card1, card2, card3, card4] = cards;
         <img src="/assets/images/target-1.jpg" alt="Екип на INclusive в офиса" width="399" height="301" loading="lazy" />
       </div>
       {[card1, card2].map((c) => (
-        <article class={`ta__card${c.accent ? " ta__card--accent" : ""}${c.mobileAccent ? " ta__card--m-accent" : ""}`}>
+        <article class={`ta__card${c.accent ? " ta__card--accent" : ""}${c.mobileAccent ? " ta__card--m-accent" : ""}`} tabindex="0">
           <span class="gold-rule"></span>
           <div class="ta__card-body">
             <h3 class="ta__card-title">{c.title}</h3>
@@ -53,7 +53,7 @@ const [card1, card2, card3, card4] = cards;
 
       <!-- Row 2 -->
       {[card3, card4].map((c) => (
-        <article class="ta__card">
+        <article class="ta__card" tabindex="0">
           <span class="gold-rule"></span>
           <div class="ta__card-body">
             <h3 class="ta__card-title">{c.title}</h3>
@@ -164,9 +164,14 @@ const [card1, card2, card3, card4] = cards;
     color: var(--color-gray-80);
   }
 
-  /* Desktop: only the accent card shows its description */
-  .ta__card:not(.ta__card--accent) .ta__card-text {
+  /* Desktop: descriptions are hidden, revealed on hover (or keyboard focus) */
+  .ta__card-text {
     display: none;
+  }
+
+  .ta__card:hover .ta__card-text,
+  .ta__card:focus-within .ta__card-text {
+    display: block;
   }
 
   @media (max-width: 991px) {
