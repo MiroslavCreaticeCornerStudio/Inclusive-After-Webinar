@@ -4,7 +4,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 <BaseLayout
   title="Благодарим — INclusive"
-  description="Кандидатурата ти е приета. Линкът за достъп до уебинара е изпратен на имейла ти."
+  description="Получихме кандидатурата ти. Ще се свържем с теб съвсем скоро."
 >
   <meta name="robots" content="noindex" slot="head" />
 
@@ -23,41 +23,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       <h1 class="ty__title">Благодарим ти!</h1>
 
       <p class="ty__lead">
-        Мястото ти за уебинара е запазено. Изпратихме потвърждение и линк за достъп на посочения
-        имейл — провери и папка „Спам“, ако не го откриеш.
+        Получихме кандидатурата ти. Нашият екип ще се свърже с теб съвсем скоро със следващите
+        стъпки — провери и папка „Спам“, в случай че имейлът ни попадне там.
       </p>
 
-      <ul class="ty__details">
-        <li class="ty__detail">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="3" y="11" width="18" height="10" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
-          <span>Онлайн в Zoom</span>
-        </li>
-      </ul>
-
-      <a class="btn ty__join" id="zoom-join" href="#" target="_blank" rel="noopener" hidden>
-        Влез в уебинара
-      </a>
       <a class="ty__back" href="/">Обратно към началото</a>
     </div>
   </main>
 </BaseLayout>
-
-<script>
-  // Reveal the Zoom join button using the unique link the form stored on success.
-  let url = "";
-  try {
-    url = sessionStorage.getItem("inclusive_join_url") || "";
-  } catch {}
-  if (url.startsWith("https://")) {
-    const btn = document.getElementById("zoom-join") as HTMLAnchorElement | null;
-    if (btn) {
-      btn.href = url;
-      btn.hidden = false;
-    }
-  }
-</script>
 
 <style>
   .ty {
@@ -109,30 +82,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     line-height: 1.4;
     color: var(--color-text-primary);
   }
-  .ty__details {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1em 2em;
-    margin-block: 0.5em 1em;
-  }
-  .ty__detail {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-    font-family: var(--font-body);
-    font-weight: 400;
-    font-size: 1.125em; /* 18px */
-    color: var(--color-text-primary);
-  }
-  .ty__detail svg {
-    color: var(--color-gold);
-  }
   .ty__back {
     font-family: var(--font-body);
     font-size: 1em;
     color: var(--color-text-secondary);
     text-decoration: underline;
+    margin-top: 0.5em;
   }
   .ty__back:hover {
     color: var(--color-gold);

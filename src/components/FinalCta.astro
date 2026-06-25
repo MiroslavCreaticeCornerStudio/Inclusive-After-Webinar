@@ -373,10 +373,6 @@ const beliefs = [
           form.reset();
           fields.forEach((n) => showError(n, false));
           setStatus("Пренасочване…", "ok");
-          // Stash the unique Zoom join link so the thank-you page can reveal it.
-          try {
-            if (result.joinUrl) sessionStorage.setItem("inclusive_join_url", result.joinUrl);
-          } catch {}
           window.location.assign("/thank-you");
           return;
         }

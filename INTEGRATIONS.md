@@ -1,90 +1,66 @@
-# Form Integrations — Zoom Webinar + Brevo
+# Form Integrations — Brevo + Skyguru CRM
 
-The "Кандидатствай сега" form (Final CTA section) submits to a server endpoint that
-registers the applicant for a Zoom webinar **and** adds them to a Brevo contact list.
+The "Стани част от печелившия отбор!" form (Final CTA section) captures leads into
+**Brevo** (a contact list) and forwards them to the **Skyguru CRM**, with Facebook/UTM
+attribution. On success the visitor is sent to a `/thank-you` confirmation page.
+
+> Zoom webinar registration was removed (no active webinar). The form is now pure lead capture.
 
 ## Flow
 
 ```
-FinalCta form  ──POST JSON──▶  /api/apply  ──▶  Zoom  (webinar registrant)
- (name, phone,                  (server         └──▶  Brevo (contact → list #9)
-  email, consent)                function)
+FinalCta form ──POST JSON──▶ /api/apply (server fn) ──▶ Brevo  (contact → list #9)
+ (name, phone,                                        └──▶ Skyguru CRM (best-effort)
+  email, consent,
+  + fbclid/UTM)        success ──▶ redirect to /thank-you
 ```
 
 - Endpoint: [`src/pages/api/apply.ts`](src/pages/api/apply.ts) — `export const prerender = false`
-  (runs as a serverless function; the rest of the site stays static).
-- The endpoint validates input, then calls Zoom + Brevo in parallel. If **either** succeeds the
-  lead is considered captured; failures are logged server-side (never the secrets).
-- Zoom auth uses **Server-to-Server OAuth** — a fresh access token is fetched per request from the
-  Account ID + Client ID + Client Secret (the short-lived token you also provided isn't needed).
+  (serverless function; the rest of the site stays static).
+- CRM forward: [`src/lib/crm.ts`](src/lib/crm.ts) — best-effort, never blocks the Brevo capture.
+- Brevo write uses a tiered attribute fallback so a missing attribute never costs the lead.
 
 ## Environment variables
 
-Set these in `.env` locally (gitignored) and in your host's dashboard for production.
-See [`.env.example`](.env.example).
+Set in `.env` locally (gitignored) and in the host dashboard for production. See
+[`.env.example`](.env.example).
 
-| Var | Notes |
-|-----|-------|
-| `ZOOM_ACCOUNT_ID` / `ZOOM_CLIENT_ID` / `ZOOM_CLIENT_SECRET` | Zoom S2S OAuth app |
-| `ZOOM_WEBINAR_ID` | Webinar ID, spaces removed (`87979328808`) |
-| `BREVO_API_KEY` | Brevo API key |
-| `BREVO_LIST_ID` | Brevo list (default `9`) |
-
-The Zoom app needs the **`webinar:write:registrant`** scope (verified present) and the webinar
-must have **registration enabled** (verified — a test registrant was accepted).
-
-## Deploying
-
-Configured for **Vercel** (`@astrojs/vercel` adapter). To deploy:
-
-1. `vercel` (or connect the Git repo in the Vercel dashboard).
-2. Add all the env vars above under **Project → Settings → Environment Variables**.
-3. Update `site` in `astro.config.mjs` to the real domain (also `public/robots.txt`).
-
-Deploying elsewhere? Swap the adapter in `astro.config.mjs`:
-`@astrojs/node` (`{ mode: 'standalone' }`) for any Node host, or `@astrojs/netlify` for Netlify.
+| Var | Required | Notes |
+|-----|----------|-------|
+| `BREVO_API_KEY` | yes | Brevo API key |
+| `BREVO_LIST_ID` | yes | Brevo list (default `9`) |
+| `CRM_ENDPOINT` | no | Defaults to `https://inclusive.skyguru.ai/api/v1/public/leads` |
+| `SKYGURU_API_KEY` | no | Bearer token for the CRM, only if it requires auth |
 
 ## Brevo contact fields written
 
 | Brevo attribute | Source |
 |---|---|
-| `FIRSTNAME` / `LASTNAME` | split from the name field |
-| `TELEFON` | raw phone (reliable text field) |
+| `FIRSTNAME` | the name field |
+| `TELEFON` | raw phone (text) |
 | `SMS` | normalized phone (best-effort; dropped if Brevo rejects the format) |
-| `ZOOM_JOIN_URL` | the registrant's **unique Zoom join link** (from the Zoom API response) |
+| `FBCLID`, `UTM_SOURCE`, `UTM_MEDIUM`, `UTM_CAMPAIGN`, `UTM_TERM`, `UTM_CONTENT` | from the ad URL |
+| `AD_TIMESTAMP`, `LANDING_PAGE` | fb click time + landing URL |
 
-Because the join link comes from the Zoom registration response, the endpoint calls **Zoom first**,
-captures `join_url`, then writes the Brevo contact. If Zoom fails, the contact is still saved
-(without the link). The Brevo field names are constants at the top of `addBrevo()` in `apply.ts`.
+Facebook/UTM params are captured on page load in `BaseLayout.astro` (→ `localStorage`) and
+attached to the submission.
 
 ## Behaviour notes
 
-- **Phone → Brevo SMS**: normalized to E.164 (Bulgarian `+359` default). If Brevo rejects the
-  format, the contact is still saved without the SMS field (automatic retry). The phone is always
-  kept in the `TELEFON` text field regardless.
-- **Duplicate email**: Brevo updates the existing contact (`updateEnabled: true`).
-- **Diagnosing failures**: check the function logs (Vercel → Deployments → Functions, or the local
-  `astro dev` console) for `[apply] Zoom failed:` / `[apply] Brevo failed:` lines.
+- **Diagnosing failures**: check the function logs (Vercel → Deployments → Functions, or the
+  local `astro dev` console) for `Brevo error` / `CRM error` lines.
+- **No-JS fallback**: the endpoint also accepts form-encoded posts.
 
 ## ⚠️ Test data to delete
 
-End-to-end tests created two entries — please remove them from Zoom registrants and Brevo list #9:
+End-to-end tests created these — remove from Brevo list #9 (and Skyguru CRM where noted):
 
 - `inclusive.form.test@example.com` — "Тест Кандидатура"
 - `inclusive.form.test2@example.com` — "Тест Браузър"
 - `inclusive.zoomlink.test@example.com` — "Тест ЗумЛинк"
-- `inclusive.formlogic.test@example.com` — "Тест ФормЛогика" (Brevo list #9 + Skyguru CRM)
-
-## ⚠️ The configured Zoom webinar has ENDED
-
-`ZOOM_WEBINAR_ID=87979328808` (879 7932 8808) now returns
-`code 3038 — "The webinar is over. You cannot register now."` so no join link is issued.
-The form degrades gracefully (lead + tracking still captured in Brevo/CRM, redirect to
-`/thank-you` without a join button). Point `ZOOM_WEBINAR_ID` at an **upcoming** webinar to
-restore join-link generation — the rest of the flow already works.
+- `inclusive.formlogic.test@example.com` — "Тест ФормЛогика" (Brevo + Skyguru CRM)
 
 ## ⚠️ Rotate the secrets
 
-The Zoom Client Secret and Brevo API key were shared in plaintext. Rotate them
-(Zoom Marketplace app → regenerate secret; Brevo → SMTP & API → regenerate key) and update `.env`
-+ the host env vars.
+The Brevo API key was shared in plaintext during setup. Rotate it (Brevo → SMTP & API →
+regenerate) and update `.env` + the host env vars.

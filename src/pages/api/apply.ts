@@ -4,7 +4,6 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 // Adapter-agnostic runtime secrets (reads `.env` in dev, Vercel env vars in prod).
 import { getSecret } from "astro:env/server";
-import { registerForWebinar } from "../../lib/zoom";
 import { sendToCrm } from "../../lib/crm";
 
 const BREVO_CONTACTS_ENDPOINT = "https://api.brevo.com/v3/contacts";
@@ -89,17 +88,6 @@ export const POST: APIRoute = async ({ request }) => {
     }
   }
 
-  // Register the attendee in the Zoom webinar (best-effort — a Zoom failure must
-  // NEVER block the Brevo lead capture). The unique join link is stored on the
-  // Brevo contact and returned so the thank-you page can show it.
-  const nameParts = name.split(/\s+/).filter(Boolean);
-  const zoom = await registerForWebinar({
-    email,
-    firstName: nameParts[0] ?? name,
-    lastName: nameParts.slice(1).join(" "),
-  });
-  const joinUrl = zoom?.joinUrl ?? "";
-
   // Forward the full lead to the custom CRM (skyguru) — best-effort, never blocks.
   const crmPayload: Record<string, unknown> = {
     name,
@@ -110,7 +98,6 @@ export const POST: APIRoute = async ({ request }) => {
     source: "inclusive.bg",
     submitted_at: new Date().toISOString(),
   };
-  if (joinUrl) crmPayload.join_url = joinUrl;
   for (const key of [
     "fbclid",
     "utm_source",
@@ -145,26 +132,22 @@ export const POST: APIRoute = async ({ request }) => {
   const ok = (res: Response) => res.ok || res.status === 201 || res.status === 204;
 
   try {
-    // Phone → TELEFON (text) with SMS as a backup. Join link → both ZOOM_JOIN_URL and
-    // WEBINARURL (both exist in this account). Richest payload first; fall back so a
-    // missing attribute never costs us the lead OR the Zoom join link.
-    const linkAttr = joinUrl ? { ZOOM_JOIN_URL: joinUrl, WEBINARURL: joinUrl } : {};
+    // Phone → TELEFON (text) with SMS as a backup. Richest payload first; fall back so a
+    // missing attribute in this Brevo account never costs us the lead.
     const telAttr = phone ? { TELEFON: phone } : {};
     const smsAttr = sms ? { SMS: sms } : {};
     const attempts = [
-      { ...nameAttr, ...telAttr, ...smsAttr, ...linkAttr, ...trackingAttributes },
-      { ...nameAttr, ...telAttr, ...linkAttr, ...trackingAttributes },
-      { ...nameAttr, ...telAttr, ...linkAttr },
-      { ...nameAttr, ...smsAttr, ...linkAttr },
-      { ...nameAttr, ...linkAttr },
+      { ...nameAttr, ...telAttr, ...smsAttr, ...trackingAttributes },
+      { ...nameAttr, ...telAttr, ...trackingAttributes },
       { ...nameAttr, ...telAttr },
+      { ...nameAttr, ...smsAttr },
       { ...nameAttr },
     ];
     let res: Response | null = null;
     for (const attrs of attempts) {
       res = await createContact(attrs);
       if (ok(res)) {
-        return json({ ok: true, joinUrl });
+        return json({ ok: true });
       }
     }
     console.error("Brevo error", res?.status, res ? await res.text() : "no response");
