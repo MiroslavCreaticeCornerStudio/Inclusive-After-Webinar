@@ -175,7 +175,7 @@ const items = [
 
   @keyframes everyday-fill {
     from { width: 0; }
-    to { width: 11.6875em; } /* 187px */
+    to { width: 100%; } /* fills the full container width */
   }
 
   .everyday__item.is-active .everyday__item-rule {
@@ -194,7 +194,7 @@ const items = [
     }
     .everyday__item.is-active .everyday__item-rule {
       animation: none;
-      width: 11.6875em; /* static line; no auto-advance */
+      width: 100%; /* static full line; no auto-advance */
     }
   }
 
