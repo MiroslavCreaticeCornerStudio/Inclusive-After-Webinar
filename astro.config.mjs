@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig, envField } from 'astro/config';
+import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 
@@ -10,18 +10,11 @@ import vercel from '@astrojs/vercel';
 // (it has `export const prerender = false`). The adapter below enables that.
 // Deploying somewhere other than Vercel? Swap `@astrojs/vercel` for
 // `@astrojs/node` ({ mode: 'standalone' }) or `@astrojs/netlify`.
+//
+// Server secrets are read at runtime via `getSecret()` from `astro:env/server`
+// (in src/lib/zoom.ts, src/lib/crm.ts, src/pages/api/apply.ts) — no schema needed.
 export default defineConfig({
   site: 'https://inclusive.bg',
   adapter: vercel(),
   integrations: [sitemap()],
-  env: {
-    schema: {
-      ZOOM_ACCOUNT_ID: envField.string({ context: 'server', access: 'secret' }),
-      ZOOM_CLIENT_ID: envField.string({ context: 'server', access: 'secret' }),
-      ZOOM_CLIENT_SECRET: envField.string({ context: 'server', access: 'secret' }),
-      ZOOM_WEBINAR_ID: envField.string({ context: 'server', access: 'secret' }),
-      BREVO_API_KEY: envField.string({ context: 'server', access: 'secret' }),
-      BREVO_LIST_ID: envField.number({ context: 'server', access: 'secret', default: 9 }),
-    },
-  },
 });

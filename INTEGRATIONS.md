@@ -73,6 +73,15 @@ End-to-end tests created two entries — please remove them from Zoom registrant
 - `inclusive.form.test@example.com` — "Тест Кандидатура"
 - `inclusive.form.test2@example.com` — "Тест Браузър"
 - `inclusive.zoomlink.test@example.com` — "Тест ЗумЛинк"
+- `inclusive.formlogic.test@example.com` — "Тест ФормЛогика" (Brevo list #9 + Skyguru CRM)
+
+## ⚠️ The configured Zoom webinar has ENDED
+
+`ZOOM_WEBINAR_ID=87979328808` (879 7932 8808) now returns
+`code 3038 — "The webinar is over. You cannot register now."` so no join link is issued.
+The form degrades gracefully (lead + tracking still captured in Brevo/CRM, redirect to
+`/thank-you` without a join button). Point `ZOOM_WEBINAR_ID` at an **upcoming** webinar to
+restore join-link generation — the rest of the flow already works.
 
 ## ⚠️ Rotate the secrets
 

@@ -71,10 +71,10 @@
   --color-text-white: var(--color-gray-10);
   --color-border: var(--color-gold);
 
-  /* Typography — Montserrat (free, Cyrillic-capable) substitutes Le Havre / Futura PT.
-     Swap to licensed fonts by editing these vars + the <link> in BaseLayout.astro. */
-  --font-heading: "Montserrat", system-ui, sans-serif;
-  --font-body: "Montserrat", system-ui, sans-serif;
+  /* Typography — Le Havre (display) + Futura PT (body) via Adobe Fonts (Typekit),
+     matching the Webinar_Evelin project. Montserrat stays as a Cyrillic-safe fallback. */
+  --font-heading: "le-havre", "Montserrat", system-ui, sans-serif;
+  --font-body: "futura-pt", "Montserrat", system-ui, sans-serif;
 
   /* Spacing scale */
   --spacing-xs: 0.25em;   /* 4px */
@@ -109,6 +109,11 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* Ensure the HTML `hidden` attribute wins over display rules (e.g. .btn) */
+[hidden] {
+  display: none !important;
 }
 
 html {

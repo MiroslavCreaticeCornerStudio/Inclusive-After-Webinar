@@ -12,7 +12,7 @@ const beliefs = [
   <div class="cta__panel container">
     <div class="cta__text">
       <div class="cta__heading">
-        <h2 class="cta__title">Стани част от екипа на INclusive</h2>
+        <h2 class="cta__title">Стани част от печелившия отбор!</h2>
         <span class="gold-rule"></span>
       </div>
       <div class="cta__beliefs">
@@ -344,11 +344,19 @@ const beliefs = [
         return;
       }
 
+      let tracking: Record<string, string> = {};
+      try {
+        tracking = JSON.parse(localStorage.getItem("inclusive_tracking") || "{}");
+      } catch {
+        /* ignore */
+      }
+
       const data = {
         name: field("name").value.trim(),
         phone: field("phone").value.trim(),
         email: field("email").value.trim(),
         consent: field("consent").checked,
+        ...tracking, // fbclid + utm_* for Facebook offline conversion tracking
       };
 
       if (submit) submit.disabled = true;
@@ -364,10 +372,15 @@ const beliefs = [
         if (res.ok && result.ok) {
           form.reset();
           fields.forEach((n) => showError(n, false));
-          setStatus("Благодарим! Кандидатурата ти е приета — ще се свържем с теб.", "ok");
-        } else {
-          setStatus("Възникна грешка при изпращането. Моля, опитай отново.", "error");
+          setStatus("Пренасочване…", "ok");
+          // Stash the unique Zoom join link so the thank-you page can reveal it.
+          try {
+            if (result.joinUrl) sessionStorage.setItem("inclusive_join_url", result.joinUrl);
+          } catch {}
+          window.location.assign("/thank-you");
+          return;
         }
+        setStatus(result.error || "Възникна грешка при изпращането. Моля, опитай отново.", "error");
       } catch {
         setStatus("Няма връзка със сървъра. Провери интернет връзката и опитай отново.", "error");
       } finally {

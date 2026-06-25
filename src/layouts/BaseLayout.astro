@@ -47,7 +47,10 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? "https://inclusive.bg");
     {description && <meta name="twitter:description" content={description} />}
     <meta name="twitter:image" content={ogImageUrl} />
 
-    {/* Fonts — Montserrat (Cyrillic-capable) substitutes Le Havre / Futura PT */}
+    {/* Brand fonts: Le Havre (display) + Futura PT (body) via Adobe Fonts (Typekit),
+        same kit as the Webinar_Evelin project. Montserrat below is a Cyrillic-safe fallback. */}
+    <link rel="preconnect" href="https://use.typekit.net" crossorigin />
+    <link rel="stylesheet" href="https://use.typekit.net/fas0rfi.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -60,5 +63,40 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? "https://inclusive.bg");
   <body>
     <a class="sr-only" href="#top">Към съдържанието</a>
     <slot />
+
+    <!-- Facebook Ads offline-conversion tracking: capture fbclid + UTMs from the
+         ad URL and persist them so they can be attached to the form submission. -->
+    <script is:inline>
+      (function () {
+        try {
+          var KEYS = [
+            "fbclid",
+            "utm_source",
+            "utm_medium",
+            "utm_campaign",
+            "utm_term",
+            "utm_content",
+          ];
+          var params = new URLSearchParams(window.location.search);
+          var store = JSON.parse(localStorage.getItem("inclusive_tracking") || "{}");
+          var changed = false;
+          KEYS.forEach(function (k) {
+            var v = params.get(k);
+            if (v) {
+              store[k] = v;
+              changed = true;
+            }
+          });
+          if (params.get("fbclid")) {
+            store.fb_click_time = Math.floor(Date.now() / 1000);
+            store.landing_url = window.location.href;
+            changed = true;
+          }
+          if (changed) localStorage.setItem("inclusive_tracking", JSON.stringify(store));
+        } catch (e) {
+          /* localStorage unavailable — ignore */
+        }
+      })();
+    </script>
   </body>
 </html>

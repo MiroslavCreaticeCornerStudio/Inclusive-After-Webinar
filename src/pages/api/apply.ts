@@ -1,185 +1,184 @@
-import type { APIRoute } from "astro";
-import {
-  ZOOM_ACCOUNT_ID,
-  ZOOM_CLIENT_ID,
-  ZOOM_CLIENT_SECRET,
-  ZOOM_WEBINAR_ID,
-  BREVO_API_KEY,
-  BREVO_LIST_ID,
-} from "astro:env/server";
-
-// On-demand (server) route — runs as a function, never prerendered.
+// On-demand endpoint (runs as a Vercel serverless function) — NOT prerendered.
 export const prerender = false;
 
-const json = (data: unknown, status = 200) =>
-  new Response(JSON.stringify(data), {
+import type { APIRoute } from "astro";
+// Adapter-agnostic runtime secrets (reads `.env` in dev, Vercel env vars in prod).
+import { getSecret } from "astro:env/server";
+import { registerForWebinar } from "../../lib/zoom";
+import { sendToCrm } from "../../lib/crm";
+
+const BREVO_CONTACTS_ENDPOINT = "https://api.brevo.com/v3/contacts";
+
+function json(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: { "content-type": "application/json" },
   });
+}
 
-const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-
-/** Best-effort normalize to E.164-ish for Brevo SMS (defaults to Bulgaria +359). */
+// Normalize a (likely Bulgarian) phone number to E.164 for Brevo's SMS attribute.
 function normalizePhone(raw: string): string | null {
-  let p = raw.replace(/[^\d+]/g, "");
+  const p = (raw || "").trim().replace(/[^\d+]/g, "");
   if (!p) return null;
   if (p.startsWith("+")) return p;
   if (p.startsWith("00")) return "+" + p.slice(2);
-  if (p.startsWith("0")) return "+359" + p.slice(1);
   if (p.startsWith("359")) return "+" + p;
+  if (p.startsWith("0")) return "+359" + p.slice(1);
   return "+359" + p;
 }
 
-/** Fetch a fresh Zoom Server-to-Server OAuth access token. */
-async function getZoomToken(): Promise<string> {
-  const basic = btoa(`${ZOOM_CLIENT_ID}:${ZOOM_CLIENT_SECRET}`);
-  const res = await fetch(
-    `https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${encodeURIComponent(ZOOM_ACCOUNT_ID)}`,
-    { method: "POST", headers: { Authorization: `Basic ${basic}` } }
-  );
-  if (!res.ok) {
-    throw new Error(`zoom_token ${res.status}: ${await res.text()}`);
+export const POST: APIRoute = async ({ request }) => {
+  const apiKey = getSecret("BREVO_API_KEY")?.trim();
+  const listId = Number(getSecret("BREVO_LIST_ID") ?? 9);
+
+  if (!apiKey) {
+    return json(
+      { ok: false, error: "Формата все още не е конфигурирана (липсва BREVO_API_KEY)." },
+      500,
+    );
   }
-  const data = (await res.json()) as { access_token?: string };
-  if (!data.access_token) throw new Error("zoom_token: no access_token");
-  return data.access_token;
-}
 
-/** Register the applicant as a webinar registrant. Returns the unique join URL. */
-async function registerZoom(input: {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-}): Promise<string> {
-  const token = await getZoomToken();
-  const webinarId = ZOOM_WEBINAR_ID.replace(/\s+/g, "");
-  const body: Record<string, string> = {
-    email: input.email,
-    first_name: input.firstName,
+  // Accept JSON or classic form-encoded submissions.
+  let body: Record<string, any> = {};
+  try {
+    const ct = request.headers.get("content-type") || "";
+    if (ct.includes("application/json")) {
+      body = await request.json();
+    } else {
+      const fd = await request.formData();
+      fd.forEach((v, k) => (body[k] = v));
+    }
+  } catch {
+    return json({ ok: false, error: "Невалидни данни." }, 400);
+  }
+
+  const name = String(body.name ?? "").trim();
+  const email = String(body.email ?? "").trim().toLowerCase();
+  const phone = String(body.phone ?? "").trim();
+  const consent =
+    body.consent === true || body.consent === "on" || body.consent === "true";
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return json({ ok: false, error: "Моля, въведете валиден имейл адрес." }, 400);
+  }
+  if (!consent) {
+    return json({ ok: false, error: "Моля, дайте съгласие за обработка на данните." }, 400);
+  }
+
+  const sms = normalizePhone(phone);
+  const nameAttr: Record<string, string> = name ? { FIRSTNAME: name } : {};
+
+  // Facebook offline-conversion tracking → Brevo contact attributes.
+  // Mapped to the attributes that exist in this Brevo account (verified):
+  // fb_click_time → AD_TIMESTAMP, landing_url → LANDING_PAGE.
+  const TRACKING_MAP: Record<string, string> = {
+    fbclid: "FBCLID",
+    utm_source: "UTM_SOURCE",
+    utm_medium: "UTM_MEDIUM",
+    utm_campaign: "UTM_CAMPAIGN",
+    utm_term: "UTM_TERM",
+    utm_content: "UTM_CONTENT",
+    fb_click_time: "AD_TIMESTAMP",
+    landing_url: "LANDING_PAGE",
   };
-  if (input.lastName) body.last_name = input.lastName;
-  if (input.phone) body.phone = input.phone;
+  const trackingAttributes: Record<string, string> = {};
+  for (const [key, attr] of Object.entries(TRACKING_MAP)) {
+    const v = (body as Record<string, unknown>)[key];
+    if (v !== undefined && v !== null && String(v).trim() !== "") {
+      trackingAttributes[attr] = String(v).slice(0, 250);
+    }
+  }
 
-  const res = await fetch(`https://api.zoom.us/v2/webinars/${webinarId}/registrants`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+  // Register the attendee in the Zoom webinar (best-effort — a Zoom failure must
+  // NEVER block the Brevo lead capture). The unique join link is stored on the
+  // Brevo contact and returned so the thank-you page can show it.
+  const nameParts = name.split(/\s+/).filter(Boolean);
+  const zoom = await registerForWebinar({
+    email,
+    firstName: nameParts[0] ?? name,
+    lastName: nameParts.slice(1).join(" "),
   });
-  if (!res.ok) {
-    throw new Error(`zoom_register ${res.status}: ${await res.text()}`);
-  }
-  const data = (await res.json()) as { join_url?: string };
-  return data.join_url ?? "";
-}
+  const joinUrl = zoom?.joinUrl ?? "";
 
-// Brevo custom field (text) that stores the registrant's unique Zoom join link.
-const BREVO_ZOOM_LINK_ATTR = "ZOOM_JOIN_URL";
-// Brevo text field for the raw phone (reliable — unlike SMS it has no E.164 validation).
-const BREVO_PHONE_ATTR = "TELEFON";
-
-/** Create/update the contact in Brevo and add to the configured list. */
-async function addBrevo(input: {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  joinUrl: string;
-}): Promise<void> {
-  const baseAttrs: Record<string, string> = {
-    FIRSTNAME: input.firstName,
-    LASTNAME: input.lastName,
+  // Forward the full lead to the custom CRM (skyguru) — best-effort, never blocks.
+  const crmPayload: Record<string, unknown> = {
+    name,
+    email,
+    phone,
+    consent,
+    form: "Стани част от печелившия отбор!",
+    source: "inclusive.bg",
+    submitted_at: new Date().toISOString(),
   };
-  if (input.phone) baseAttrs[BREVO_PHONE_ATTR] = input.phone;
-  if (input.joinUrl) baseAttrs[BREVO_ZOOM_LINK_ATTR] = input.joinUrl;
+  if (joinUrl) crmPayload.join_url = joinUrl;
+  for (const key of [
+    "fbclid",
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_term",
+    "utm_content",
+    "fb_click_time",
+    "landing_url",
+  ]) {
+    const v = (body as Record<string, unknown>)[key];
+    if (v !== undefined && v !== null && String(v).trim() !== "") crmPayload[key] = String(v);
+  }
+  await sendToCrm(crmPayload);
 
-  const post = (attributes: Record<string, string>) =>
-    fetch("https://api.brevo.com/v3/contacts", {
+  const createContact = (attributes: Record<string, string>) =>
+    fetch(BREVO_CONTACTS_ENDPOINT, {
       method: "POST",
       headers: {
-        "api-key": BREVO_API_KEY,
-        "Content-Type": "application/json",
+        "api-key": apiKey,
+        "content-type": "application/json",
         accept: "application/json",
       },
       body: JSON.stringify({
-        email: input.email,
+        email,
         attributes,
-        listIds: [BREVO_LIST_ID],
-        updateEnabled: true,
+        listIds: [listId],
+        updateEnabled: true, // upsert if the contact already exists
       }),
     });
 
-  const sms = input.phone ? normalizePhone(input.phone) : null;
-  let res = await post(sms ? { ...baseAttrs, SMS: sms } : baseAttrs);
+  const ok = (res: Response) => res.ok || res.status === 201 || res.status === 204;
 
-  // If Brevo rejected the SMS format, retry without it so the contact is still saved.
-  if (!res.ok && sms) {
-    res = await post(baseAttrs);
-  }
-  if (!res.ok) {
-    throw new Error(`brevo ${res.status}: ${await res.text()}`);
-  }
-}
-
-export const POST: APIRoute = async ({ request }) => {
-  // Accept JSON (fetch) or form-encoded (no-JS fallback).
-  let name = "";
-  let phone = "";
-  let email = "";
-  let consent = false;
-
-  const ct = request.headers.get("content-type") || "";
   try {
-    if (ct.includes("application/json")) {
-      const b = (await request.json()) as Record<string, unknown>;
-      name = String(b.name ?? "").trim();
-      phone = String(b.phone ?? "").trim();
-      email = String(b.email ?? "").trim();
-      consent = b.consent === true || b.consent === "on" || b.consent === "true";
-    } else {
-      const f = await request.formData();
-      name = String(f.get("name") ?? "").trim();
-      phone = String(f.get("phone") ?? "").trim();
-      email = String(f.get("email") ?? "").trim();
-      consent = Boolean(f.get("consent"));
+    // Phone → TELEFON (text) with SMS as a backup. Join link → both ZOOM_JOIN_URL and
+    // WEBINARURL (both exist in this account). Richest payload first; fall back so a
+    // missing attribute never costs us the lead OR the Zoom join link.
+    const linkAttr = joinUrl ? { ZOOM_JOIN_URL: joinUrl, WEBINARURL: joinUrl } : {};
+    const telAttr = phone ? { TELEFON: phone } : {};
+    const smsAttr = sms ? { SMS: sms } : {};
+    const attempts = [
+      { ...nameAttr, ...telAttr, ...smsAttr, ...linkAttr, ...trackingAttributes },
+      { ...nameAttr, ...telAttr, ...linkAttr, ...trackingAttributes },
+      { ...nameAttr, ...telAttr, ...linkAttr },
+      { ...nameAttr, ...smsAttr, ...linkAttr },
+      { ...nameAttr, ...linkAttr },
+      { ...nameAttr, ...telAttr },
+      { ...nameAttr },
+    ];
+    let res: Response | null = null;
+    for (const attrs of attempts) {
+      res = await createContact(attrs);
+      if (ok(res)) {
+        return json({ ok: true, joinUrl });
+      }
     }
-  } catch {
-    return json({ ok: false, error: "invalid_request" }, 400);
-  }
-
-  if (!name || !email) return json({ ok: false, error: "missing_fields" }, 400);
-  if (!EMAIL_RE.test(email)) return json({ ok: false, error: "invalid_email" }, 400);
-  if (!consent) return json({ ok: false, error: "consent_required" }, 400);
-
-  const [firstName, ...rest] = name.split(/\s+/);
-  const lastName = rest.join(" ");
-  const payload = { firstName, lastName, email, phone };
-
-  // Zoom first — its response carries the unique join URL we pass to Brevo.
-  let zoomOk = false;
-  let joinUrl = "";
-  try {
-    joinUrl = await registerZoom(payload);
-    zoomOk = true;
+    console.error("Brevo error", res?.status, res ? await res.text() : "no response");
+    return json(
+      { ok: false, error: "Възникна грешка при записването. Опитайте отново." },
+      502,
+    );
   } catch (e) {
-    console.error("[apply] Zoom failed:", (e as Error)?.message);
+    console.error("Brevo request failed", e);
+    return json(
+      { ok: false, error: "Възникна грешка при връзката. Опитайте отново." },
+      502,
+    );
   }
-
-  // Brevo second — store the join URL in the ZOOM_JOIN_URL custom field.
-  let brevoOk = false;
-  try {
-    await addBrevo({ ...payload, joinUrl });
-    brevoOk = true;
-  } catch (e) {
-    console.error("[apply] Brevo failed:", (e as Error)?.message);
-  }
-
-  // The lead is captured if at least one integration succeeded.
-  if (!zoomOk && !brevoOk) {
-    return json({ ok: false, error: "upstream_failed" }, 502);
-  }
-
-  return json({ ok: true, zoom: zoomOk, brevo: brevoOk });
 };
 
 // Politely reject other methods.
