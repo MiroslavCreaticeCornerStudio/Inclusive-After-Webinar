@@ -48,10 +48,10 @@ const beliefs = [
       </div>
 
       <div class="cta__field cta__file">
-        <span class="cta__label">Прикачи CV <span class="cta__optional">(по желание)</span></span>
+        <span class="cta__label">Прикачи CV</span>
         <label class="cta__file-btn">
           <span class="cta__file-text">Избери файл (PDF, DOC, DOCX)</span>
-          <input id="cta-cv" name="cv" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-label="Прикачи CV файл" />
+          <input id="cta-cv" name="cv" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-label="Прикачи CV файл" required />
         </label>
         <div class="cta__file-progress" hidden><span class="cta__file-progress-fill"></span></div>
         <p class="cta__file-status" aria-live="polite" hidden></p>
@@ -264,12 +264,6 @@ const beliefs = [
   }
 
   /* CV upload */
-  .cta__optional {
-    font-weight: 300;
-    color: var(--color-gray-40);
-    opacity: 0.85;
-  }
-
   .cta__file-btn {
     display: inline-flex;
     align-items: center;
@@ -513,20 +507,23 @@ const beliefs = [
         return;
       }
 
-      // If a CV is attached, wait for its upload to finish before sending.
-      if (cvInput?.files && cvInput.files[0]) {
-        if (submit) submit.disabled = true;
-        setStatus("Качване на CV…", "");
-        try {
-          await cvPending;
-        } catch {
-          /* handled below */
-        }
-        if (!cvUrl) {
-          setStatus("CV файлът не се качи успешно. Изберете го отново или го премахнете.", "error");
-          if (submit) submit.disabled = false;
-          return;
-        }
+      // CV is required — must be attached and successfully uploaded.
+      if (!(cvInput?.files && cvInput.files[0])) {
+        cvShow("Моля, прикачете CV (PDF, DOC или DOCX).", false);
+        cvInput?.focus();
+        return;
+      }
+      if (submit) submit.disabled = true;
+      setStatus("Качване на CV…", "");
+      try {
+        await cvPending;
+      } catch {
+        /* handled below */
+      }
+      if (!cvUrl) {
+        setStatus("CV файлът не се качи успешно. Изберете го отново.", "error");
+        if (submit) submit.disabled = false;
+        return;
       }
 
       let tracking: Record<string, string> = {};
@@ -541,7 +538,7 @@ const beliefs = [
         phone: field("phone").value.trim(),
         email: field("email").value.trim(),
         consent: field("consent").checked,
-        ...(cvUrl ? { cv: cvUrl } : {}),
+        cv: cvUrl, // required
         ...tracking, // fbclid + utm_* for Facebook offline conversion tracking
       };
 
