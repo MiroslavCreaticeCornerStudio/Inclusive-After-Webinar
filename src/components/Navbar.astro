@@ -1,5 +1,5 @@
 ---
-import { withBase } from "../lib/withBase";
+import { withBase, homeHref } from "../lib/withBase";
 
 const links = [
   { label: "За кого е", href: "#za-kogo-e" },
@@ -12,7 +12,7 @@ const links = [
 
 <header class="navbar">
   <div class="navbar__inner container">
-    <a class="navbar__logo" href="#top" aria-label="INclusive — недвижими имоти">
+    <a class="navbar__logo" href={homeHref} aria-label="INclusive — недвижими имоти">
       <img
         src={withBase("/assets/images/logo.png")}
         alt="INclusive недвижими имоти"

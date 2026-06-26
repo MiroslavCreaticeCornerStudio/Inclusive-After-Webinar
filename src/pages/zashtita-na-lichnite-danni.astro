@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Footer from "../components/Footer.astro";
-import { withBase } from "../lib/withBase";
+import { withBase, homeHref } from "../lib/withBase";
 
 // Content adapted from the official policy of „Инклузив България“ АД:
 // https://inclusive.bg/защита-на-личните-данни/
@@ -97,10 +97,10 @@ const sections: { title: string; paras?: string[]; list?: string[] }[] = [
   description="Политика за защита на личните данни на „Инклузив България“ АД — администратор, цели на обработката, правни основания, срокове и права на субектите на данните."
 >
   <header class="legal-top">
-    <a href={withBase("/")} class="legal-top__logo" aria-label="INclusive — начало">
+    <a href={homeHref} class="legal-top__logo" aria-label="INclusive — начало">
       <img src={withBase("/assets/images/logo.png")} alt="INclusive недвижими имоти" width="143" height="60" decoding="async" />
     </a>
-    <a href={withBase("/")} class="legal-top__back">← Към сайта</a>
+    <a href={homeHref} class="legal-top__back">← Към сайта</a>
   </header>
 
   <main id="main" class="legal">

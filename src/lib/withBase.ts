@@ -11,3 +11,7 @@ const BASE = import.meta.env.BASE_URL;
 export function withBase(path: string): string {
   return BASE.replace(/\/$/, "") + "/" + String(path).replace(/^\//, "");
 }
+
+// Site home, base-aware and WITHOUT a trailing slash ("/careers", not "/careers/").
+// Logo/home links use this so they never hit the trailing-slash 404 edge.
+export const homeHref = BASE.replace(/\/$/, "") || "/";
