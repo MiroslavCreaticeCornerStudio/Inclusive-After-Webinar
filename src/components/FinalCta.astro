@@ -47,6 +47,16 @@ const beliefs = [
         <span class="cta__error" id="cta-email-error" aria-live="polite"></span>
       </div>
 
+      <div class="cta__field cta__file">
+        <span class="cta__label">Прикачи CV <span class="cta__optional">(по желание)</span></span>
+        <label class="cta__file-btn">
+          <span class="cta__file-text">Избери файл (PDF, DOC, DOCX)</span>
+          <input id="cta-cv" name="cv" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-label="Прикачи CV файл" />
+        </label>
+        <div class="cta__file-progress" hidden><span class="cta__file-progress-fill"></span></div>
+        <p class="cta__file-status" aria-live="polite" hidden></p>
+      </div>
+
       <div class="cta__consent-field">
         <label class="cta__consent">
           <input class="cta__checkbox" type="checkbox" name="consent" required aria-describedby="cta-consent-error" />
@@ -253,6 +263,84 @@ const beliefs = [
     color: #ff8a8a;
   }
 
+  /* CV upload */
+  .cta__optional {
+    font-weight: 300;
+    color: var(--color-gray-40);
+    opacity: 0.85;
+  }
+
+  .cta__file-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    align-self: flex-start;
+    max-width: 100%;
+    padding: 0.625em 1em; /* 10px 16px */
+    border: 1px solid var(--color-gold);
+    color: var(--color-gold);
+    font-family: var(--font-body);
+    font-size: 0.875em; /* 14px */
+    font-weight: 400;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .cta__file-btn:hover {
+    background-color: var(--color-gold);
+    color: var(--color-gray-100);
+  }
+
+  .cta__file-btn input[type="file"] {
+    display: none;
+  }
+
+  .cta__file-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 18em;
+  }
+
+  .cta__file-progress {
+    width: 100%;
+    height: 0.375em; /* 6px */
+    margin-top: 0.125em;
+    background-color: var(--color-gray-80);
+    overflow: hidden;
+  }
+
+  .cta__file-progress[hidden] {
+    display: none;
+  }
+
+  .cta__file-progress-fill {
+    display: block;
+    width: 0%;
+    height: 100%;
+    background-color: var(--color-gold);
+    transition: width 0.2s ease;
+  }
+
+  .cta__file-status {
+    font-family: var(--font-body);
+    font-size: 0.875em; /* 14px */
+    font-weight: 400;
+    line-height: 1.3;
+  }
+
+  .cta__file-status[hidden] {
+    display: none;
+  }
+
+  .cta__file-status[data-state="ok"] {
+    color: var(--color-gold);
+  }
+
+  .cta__file-status[data-state="error"] {
+    color: #ff8a8a;
+  }
+
   @media (max-width: 991px) {
     .cta__panel {
       flex-direction: column;
@@ -274,6 +362,7 @@ const beliefs = [
 </style>
 
 <script>
+  import { upload } from "@vercel/blob/client";
   import { withBase } from "../lib/withBase";
 
   const form = document.querySelector(".cta__form") as HTMLFormElement | null;
@@ -335,6 +424,76 @@ const beliefs = [
     });
     field("consent").addEventListener("change", () => validateField("consent"));
 
+    // ── CV upload ──────────────────────────────────────────────────────────
+    // Upload the CV to Vercel Blob the moment it's selected (progress bar under
+    // the button), so by submit time we only send its URL. Bypasses the ~4.5MB
+    // serverless body limit. CV is optional — submitting without one is allowed.
+    const cvInput = document.getElementById("cta-cv") as HTMLInputElement | null;
+    const cvText = document.querySelector(".cta__file-text") as HTMLElement | null;
+    const cvBar = document.querySelector(".cta__file-progress") as HTMLElement | null;
+    const cvFill = document.querySelector(".cta__file-progress-fill") as HTMLElement | null;
+    const cvStatusEl = document.querySelector(".cta__file-status") as HTMLElement | null;
+    const cvDefault = cvText?.textContent || "";
+    let cvUrl = "";
+    let cvPending: Promise<unknown> | null = null;
+    let cvEpoch = 0;
+
+    const cvSetBar = (pct: number) => {
+      if (cvBar) cvBar.hidden = false;
+      if (cvFill) cvFill.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+    };
+    const cvHideBar = () => {
+      if (cvBar) cvBar.hidden = true;
+      if (cvFill) cvFill.style.width = "0%";
+    };
+    const cvShow = (text: string, ok: boolean) => {
+      if (!cvStatusEl) return;
+      cvStatusEl.textContent = text;
+      cvStatusEl.dataset.state = ok ? "ok" : "error";
+      cvStatusEl.hidden = false;
+    };
+
+    cvInput?.addEventListener("change", () => {
+      const file = cvInput.files && cvInput.files[0];
+      if (cvText) cvText.textContent = file ? file.name : cvDefault;
+      cvUrl = "";
+      if (cvStatusEl) cvStatusEl.hidden = true;
+      if (!file) {
+        cvPending = null;
+        cvHideBar();
+        return;
+      }
+      const myEpoch = ++cvEpoch;
+      cvSetBar(3);
+      const safeName = (file.name || "cv").replace(/[^a-zA-Z0-9._-]+/g, "_").slice(-100);
+      cvPending = upload(safeName, file, {
+        access: "public",
+        handleUploadUrl: withBase("/api/blob-upload"),
+        contentType: file.type || undefined,
+        onUploadProgress: (ev) => {
+          if (cvEpoch === myEpoch) cvSetBar(ev.percentage);
+        },
+      })
+        .then((blob) => {
+          if (cvEpoch !== myEpoch) return;
+          cvUrl = blob.url;
+          cvHideBar();
+          cvShow("✓ CV-то беше прикачено.", true);
+        })
+        .catch((err) => {
+          if (cvEpoch !== myEpoch) return;
+          cvHideBar();
+          cvUrl = "";
+          const m = (err instanceof Error && err.message) || "";
+          cvShow(
+            /size|large|maximum/i.test(m)
+              ? "Файлът е твърде голям (макс. 15 MB)."
+              : "Качването не бе успешно. Опитайте отново.",
+            false,
+          );
+        });
+    });
+
     const setStatus = (msg: string, state: "ok" | "error" | "") => {
       if (!status) return;
       status.textContent = msg;
@@ -354,6 +513,22 @@ const beliefs = [
         return;
       }
 
+      // If a CV is attached, wait for its upload to finish before sending.
+      if (cvInput?.files && cvInput.files[0]) {
+        if (submit) submit.disabled = true;
+        setStatus("Качване на CV…", "");
+        try {
+          await cvPending;
+        } catch {
+          /* handled below */
+        }
+        if (!cvUrl) {
+          setStatus("CV файлът не се качи успешно. Изберете го отново или го премахнете.", "error");
+          if (submit) submit.disabled = false;
+          return;
+        }
+      }
+
       let tracking: Record<string, string> = {};
       try {
         tracking = JSON.parse(localStorage.getItem("inclusive_tracking") || "{}");
@@ -366,6 +541,7 @@ const beliefs = [
         phone: field("phone").value.trim(),
         email: field("email").value.trim(),
         consent: field("consent").checked,
+        ...(cvUrl ? { cv: cvUrl } : {}),
         ...tracking, // fbclid + utm_* for Facebook offline conversion tracking
       };
 

@@ -64,6 +64,11 @@ export const POST: APIRoute = async ({ request }) => {
     if (v !== undefined && v !== null && String(v).trim() !== "") crmPayload[key] = String(v);
   }
 
+  // CV uploaded straight to Vercel Blob from the browser (see /api/blob-upload) —
+  // we receive its public URL and forward it to the CRM as an "extra" link.
+  const cvUrl = String(body.cv ?? "").trim();
+  if (cvUrl) crmPayload.extra = [{ name: "Линк към CV", value: cvUrl }];
+
   // Success now depends on the CRM accepting the lead — no silent loss.
   const delivered = await sendToCrm(crmPayload);
   if (!delivered) {
